@@ -1,0 +1,21 @@
+#!/bin/bash
+# Testing deepsea command by running all DS stages and sending output to a log file
+# Requirements: ceph cluster needs to be deployed with DS
+
+source config/CONFIG
+LOG_FILE=/tmp/test_case_deepsea_cli_$(date +%Y_%m_%d_%H_%M).log
+> $LOG_FILE
+
+echo "Running all DS stages 1-5... it can take few minutes..."
+ssh $MASTER 'deepsea salt-run state.orch ceph.stage.0' >> $LOG_FILE 2>&1
+ssh $MASTER 'deepsea salt-run state.orch ceph.stage.1' >> $LOG_FILE 2>&1
+ssh $MASTER 'deepsea salt-run state.orch ceph.stage.2' >> $LOG_FILE 2>&1
+ssh $MASTER 'deepsea salt-run state.orch ceph.stage.3' >> $LOG_FILE 2>&1
+ssh $MASTER 'deepsea salt-run state.orch ceph.stage.4' >> $LOG_FILE 2>&1
+ssh $MASTER 'deepsea salt-run state.orch ceph.stage.5' >> $LOG_FILE 2>&1
+
+echo "Log file is:"
+echo $LOG_FILE
+echo
+
+cat $LOG_FILE

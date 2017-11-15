@@ -1,0 +1,24 @@
+source config/CONFIG
+set -ex
+ssh $MASTER "ceph osd tree "
+ssh $MASTER "ceph -s "
+# GET A RANDOM HOST (NODE)
+NODE=$(ssh $MASTER "shuf -e -n 1 \$(ceph osd tree|grep host|awk '{print \$4}')")
+# GET THE FIRST OSD ON THIS NODE
+OSD=$(ssh $MASTER "ceph osd crush ls $NODE"|head -n 1|sed 's/osd.//g')
+ssh $MASTER "ceph osd crush reweight osd.${OSD} 0 "
+ssh $MASTER "ceph osd out osd.${OSD} "
+ssh $MASTER "ceph osd crush remove osd.${OSD} "
+ssh $MASTER "ceph auth del osd.${OSD} "
+ssh $NODE "systemctl stop ceph-osd@${OSD}.service"
+ssh $MASTER "ceph osd rm osd.${OSD} "
+OSD_DEV=$(ssh $NODE mount|grep ceph-${OSD}|awk '{print $1}'|sed 's/[0-9]//g')
+ssh $NODE "umount /var/lib/ceph/osd/ceph-${OSD}"
+ssh $NODE "ceph-disk zap $OSD_DEV"
+ssh $NODE "sgdisk --zap-all $OSD_DEV"
+ssh $NODE "sgdisk --clear --mbrtogpt $OSD_DEV"
+set +ex
+_wait_ceph_health_OK
+ssh $MASTER "ceph osd tree "
+ssh $MASTER "ceph osd crush ls $NODE "
+ssh $MASTER "ceph -s "

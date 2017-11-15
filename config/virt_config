@@ -1,0 +1,15 @@
+# vmnet 
+ISO_MEDIA="SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso"
+VNET_IF=$(ip a |grep virbr.\:|awk -F ":" '{print $2}'|tr -d ' ')
+VM_HYP_DEF_GW=$(ip a s dev $VNET_IF|grep 'inet '|awk '{print $2}'| cut -d/ -f1) # EXAMPLE: 192.168.100.1
+VMNET_IP_BASE=${VM_HYP_DEF_GW%\.*} # EXAMPLE: 192.168.100
+[[ -n $VMNET_IP_BASE ]] && echo 'VMNET_IP_BASE is: ' $VMNET_IP_BASE || (echo 'VMNET_IP_BASE is empty string.';exit 1)
+MASTER_IP=${VMNET_IP_BASE}.${VM_IP_START} # VM_IP_START defined in CONFIG
+VMNET_NAME=$(virsh net-list|grep active|tail -n 1|awk '{print $1}')
+[[ $VMNET_NAME ]] || (echo "ERROR: Couldn't find vmnet value.";exit 13) # exit if vmnet is empty string
+VM_IP=$VM_IP_START      # 151
+autoyast_seed=${BASEDIR}/config/autoyast_ses5node.xml
+ssh_pub_key=$(cat ~/.ssh/id_rsa.pub)
+ses_url1=$(cat ${BASEDIR}/config/REPO_ISO_URL)
+[[ -r $autoyast_seed ]] || (echo "ERROR: Autoyast file missing. Exiting.";exit 1)
+

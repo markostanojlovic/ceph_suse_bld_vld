@@ -1,0 +1,17 @@
+source config/CONFIG
+set -ex
+ssh $MASTER "ceph osd tree "
+ssh $MASTER "ceph -s "
+# GET A RANDOM HOST (NODE)
+NODE=$(ssh $MASTER "shuf -e -n 1 \$(ceph osd tree|grep host|awk '{print \$4}')")
+ssh $NODE "mount|grep ceph; lsblk"
+# GET THE FIRST OSD ON THIS NODE
+OSD=$(ssh $MASTER "ceph osd crush ls $NODE"|head -n 1|sed 's/osd.//g')
+ssh $MASTER "salt-run disengage.safety"
+ssh $MASTER "salt-run remove.osd ${OSD}"
+ssh $NODE "mount|grep ceph; lsblk"
+set +ex
+_wait_ceph_health_OK
+ssh $MASTER "ceph osd tree "
+ssh $MASTER "ceph osd crush ls $NODE "
+ssh $MASTER "ceph -s "

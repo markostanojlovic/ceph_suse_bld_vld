@@ -1,0 +1,38 @@
+#!/bin/bash
+# What it does?
+# - call test case script and collects logs
+# - logs are transffered to log/ dir
+# - calculates time of execution of the test case script
+# Reminder: test cases can be run only for already deployed cluster
+#           for whihc rsyslog and journal are configured
+# USAGE: ./run_test_case test_case_script_path
+# DO NOT RUN MULITPLE TEST CASES IN THE SAME TIME
+
+sript_start_time=$(date +%s)
+LOGS_COLLECT_START_TIME=\"$(date +%Y-%m-%d' '%H:%M:%S)\"
+sleep 2
+
+source config/CONFIG
+
+echo "Running test case..."
+TEST_CASE_LOG=/tmp/test_case_log
+> $TEST_CASE_LOG
+(tail -f $TEST_CASE_LOG &)
+sleep 0.5
+
+# calling the test case script
+source $1 > $TEST_CASE_LOG 2>&1
+
+# collecting logs
+sleep 6
+LOGS_COLLECT_END_TIME=\"$(date +%Y-%m-%d' '%H:%M:%S)\"
+SCRIPT_NAME=${1##*/}
+echo  $LOGS_COLLECT_START_TIME $LOGS_COLLECT_END_TIME $SCRIPT_NAME
+source ${BASEDIR}/script/collect_logs.sh $LOGS_COLLECT_START_TIME $LOGS_COLLECT_END_TIME $SCRIPT_NAME $TEST_CASE_LOG
+
+# killing the backround tail process
+kill $(ps -ef|grep "tail -f /tmp/test_case_log"|awk '{print $2}') 2>/dev/null
+
+# calculating script execution duration
+sript_end_time=$(date +%s);script_runtime=$(((sript_end_time-sript_start_time)/60))
+echo;echo "Runtime in minutes: " $script_runtime

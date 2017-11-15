@@ -1,0 +1,13 @@
+VM_DIR=/VM
+OSD_DEST_LIST='/VM'
+VM_NAME_BASE='ses5node'
+DOMAIN=qatest
+VM_NUM=5 # recommended 5-10 VMs
+VM_IP_START=151 # starting IP number to add to the base of IP EXAMPLE: 192.168.100.151
+MASTER=${VM_NAME_BASE}1.${DOMAIN} # first node is the master node
+MASTER_IP=${VMNET_IP_BASE}.${VM_IP_START}
+CLIENT_NODE=ses_client
+CLUSTER_HEALTH_OK_TIMEOUT=300
+BASEDIR=$(find / -type d -name ceph_suse_bld_vld 2>/dev/null || echo > /dev/null)
+source ${BASEDIR}/script/helper.sh
+DEPLOY_LOG_DIR=${BASEDIR}/log/$(cat ${BASEDIR}/config/LAST_DEPLOY_LOG_DIR)

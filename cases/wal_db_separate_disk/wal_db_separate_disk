@@ -1,0 +1,130 @@
+#!/bin/bash
+# Test case for creating host with OSDs which have WAL and DB on separate disk
+# Requirements: already deployed SES cluster
+# 1. create new VM with 3 disks ( 1 for WAL and DB and 2 for OSD data )
+# 2. add new host to the cluster
+# 3. verify cluster health
+# Expected duration: ~20min
+
+source config/CONFIG
+source config/virt_config
+
+######################################################
+# 1. create new VM with 3 disks
+######################################################
+TC_VM_NAME=ses_wal_db_tc
+(( TC_VM_IP_NUM=$VM_IP_START + $VM_NUM ))
+TC_VM_IP_ADDR=${VMNET_IP_BASE}.${TC_VM_IP_NUM}
+xmlfile=${VM_DIR}/autoyast_${TC_VM_NAME}.xml
+cp $autoyast_seed $xmlfile
+sed -i "s/__ip_default_route__/${VM_HYP_DEF_GW}/" $xmlfile
+sed -i "s/__ip_nameserver__/${VM_HYP_DEF_GW}/" $xmlfile
+sed -i "s|__ssh_pub_key__|${ssh_pub_key}|" $xmlfile
+sed -i "s/ses5hostnameses5/${TC_VM_NAME}/" $xmlfile
+sed -i "s/__VMNET_IP_BASE__xxxxx/${TC_VM_IP_ADDR}/" $xmlfile
+sed -i "s|__ses_http_link_1__|${ses_url1}|" $xmlfile
+# add hosts entry to /etc/hosts @host
+tc_hosts_entry="${TC_VM_IP_ADDR} ${TC_VM_NAME}.${DOMAIN} ${TC_VM_NAME}"
+sed -i '/${TC_VM_NAME}/d' /etc/hosts
+echo $tc_hosts_entry >> /etc/hosts
+# distribute to all cluster nodes
+ssh root@$MASTER "salt '*' cmd.run 'echo $tc_hosts_entry >> /etc/hosts'"
+
+# check if VM already exists
+virsh list --all|grep $TC_VM_NAME && (virsh destroy $TC_VM_NAME || echo "VM not running..."; virsh undefine $TC_VM_NAME || echo "No VM...")
+rm -f ${VM_DIR}/${TC_VM_NAME}* || echo "No old disks for VM..."
+
+# check if there are traces of VM in existing SES cluster TODO
+# FOR NOW, DO IT MANUALLY
+
+CREATE_VM_SCRIPT=${VM_DIR}/create_VM_${TC_VM_NAME}.sh
+echo "virt-install \
+--name ${TC_VM_NAME} \
+--memory 1024 \
+--disk path=${VM_DIR}/${TC_VM_NAME}.qcow2,size=20 \
+--vcpus 1 \
+--network network=${VMNET_NAME},model=virtio \
+--noautoconsole \
+--location /var/lib/libvirt/images/$ISO_MEDIA \
+--initrd-inject=${xmlfile} \
+--extra-args kernel_args=\"console=/dev/ttyS0 autoyast=file:${xmlfile} \" " > $CREATE_VM_SCRIPT
+chmod +x $CREATE_VM_SCRIPT
+source $CREATE_VM_SCRIPT
+
+# checking while VM shut off
+while sleep 5;do runningvm=$(virsh list|grep ${TC_VM_NAME} || echo > /dev/null );if [[ $runningvm == '' ]];then echo 'VM not running...';break;fi;done
+
+qemu-img create -f raw ${VM_DIR}/${TC_VM_NAME}-osd-1 5G
+qemu-img create -f raw ${VM_DIR}/${TC_VM_NAME}-osd-2 30G
+qemu-img create -f raw ${VM_DIR}/${TC_VM_NAME}-osd-3 30G
+
+virsh attach-disk ${TC_VM_NAME} ${VM_DIR}/${TC_VM_NAME}-osd-1 vdb --config --cache none
+virsh attach-disk ${TC_VM_NAME} ${VM_DIR}/${TC_VM_NAME}-osd-2 vdc --config --cache none
+virsh attach-disk ${TC_VM_NAME} ${VM_DIR}/${TC_VM_NAME}-osd-3 vdd --config --cache none
+
+# start VM
+virsh start $TC_VM_NAME
+
+> /root/.ssh/known_hosts
+
+# wait until init script is finished
+_wait_autoyast_script_completion_for_host $TC_VM_NAME
+
+# add /etc/hosts entries from host to VM
+grep $DOMAIN /etc/hosts > /tmp/hosts_file
+scp /tmp/hosts_file root@$TC_VM_NAME:/tmp/
+ssh  root@$TC_VM_NAME 'cat /tmp/hosts_file >> /etc/hosts'
+
+# install salt minion on the VM
+cat <<EOF > /tmp/prepare_VM
+#!/bin/bash
+set -x
+zypper ref
+zypper in -y salt-minion
+sed -i "/#master: salt/c\master: $MASTER" /etc/salt/minion
+systemctl enable salt-minion.service;systemctl start salt-minion.service
+sed -i "/server cz.pool.ntp.org iburst/c\server $MASTER iburst" /etc/ntp.conf
+systemctl status salt-minion.service -l
+EOF
+ssh root@${TC_VM_NAME} 'bash -s' < /tmp/prepare_VM
+
+######################################################
+# 2. add new host to the cluster
+######################################################
+sleep 2
+ssh root@$MASTER 'salt-key --accept-all -y'
+sleep 2
+ssh root@$MASTER 'salt \* test.ping'
+# ssh root@$MASTER "salt ${TC_VM_NAME}.${DOMAIN} grains.setval deepsea True" # looks like not needed
+ssh root@$MASTER 'salt-run state.orch ceph.stage.0'
+ssh root@$MASTER 'salt-run state.orch ceph.stage.1'
+# edit profile yml file for new node
+cat <<EOF > /tmp/profile.yml
+ceph:
+  storage:
+    osds:
+      /dev/vdc:
+        format: bluestore
+        wal: /dev/vdb
+        wal_size: 1G
+        db: /dev/vdb
+        db_size: 1G
+      /dev/vdd:
+        format: bluestore
+        wal: /dev/vdb
+        wal_size: 1G
+        db: /dev/vdb
+        db_size: 1G
+EOF
+scp /tmp/profile.yml root@$MASTER:/srv/pillar/ceph/proposals/profile-default/stack/default/ceph/minions/${TC_VM_NAME}.${DOMAIN}.yml
+ssh root@$MASTER 'salt-run state.orch ceph.stage.2'
+ssh root@$MASTER 'salt-run state.orch ceph.stage.3'
+
+######################################################
+# 3. verify cluster health
+######################################################
+sleep 10 # waiting cluster to remap pgs to new disks
+ssh root@$MASTER 'ceph health;ceph -s'
+ssh root@$TC_VM_NAME 'lsblk;mount|grep ceph;'
+
+# how to check if really WAL and DB are separated and working correctly? TODO
