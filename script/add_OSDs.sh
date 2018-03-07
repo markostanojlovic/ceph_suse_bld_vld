@@ -34,7 +34,7 @@ for osd_path in $OSD_PATHS;do
 		VM_POINTER=$((( $VM_POINTER % $VM_NUM + 1 )))
 		OSD_POINTER=$((( $OSD_POINTER + 1 )))
 		(( i += 1 ))
-	done 
+	done
 done
 
 $CREATE_OSDs_FILE

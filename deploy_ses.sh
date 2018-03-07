@@ -42,22 +42,22 @@ source ${BASEDIR}/script/prepare_VMs.sh
 # copy policy.cfg
 scp ${BASEDIR}/config/policy.cfg $MASTER:/tmp/
 # zypper upgrade
-_run_command_on_remote_host $MASTER "salt \* cmd.run 'zypper up -y'"
+_run_command_on_remote_host $MASTER "salt \* cmd.run 'zypper up -y 1>/dev/null'"
 # reboot all VMs
 _run_command_on_remote_host $MASTER "salt --async \* cmd.run 'shutdown -r +1'"
 sleep 60
 # wait until all VMs are up
 _wait_for_all_VMs_up
 # DEPLOY SES CLUSTER
-_run_script_on_remote_host $MASTER ${BASEDIR}/script/cluster_deploy.sh
+#_run_script_on_remote_host $MASTER ${BASEDIR}/script/cluster_deploy.sh
 # configure rsyslog sending logs to journal
-source  ${BASEDIR}/script/configure_rsyslog.sh
+#source  ${BASEDIR}/script/configure_rsyslog.sh
 # perform basic cluster checks
-_run_script_on_remote_host $MASTER ${BASEDIR}/script/basic_checks.sh
+#_run_script_on_remote_host $MASTER ${BASEDIR}/script/basic_checks.sh
 # basic client tests *ses_client VM up and running*
-source ${BASEDIR}/script/client_tests.sh
+#source ${BASEDIR}/script/client_tests.sh
 # collect deployment logs
-source ${BASEDIR}/script/collect_deployment_logs.sh
+# source ${BASEDIR}/script/collect_deployment_logs.sh
 
 set +x
 # calculating script execution duration
