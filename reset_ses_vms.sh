@@ -17,6 +17,25 @@
 # - VM template image
 # - libvirt pool for storing images 
 
+#=============================================
+# SLES12SP3 image for cloud/terraform 
+#=============================================
+virt-install \
+--name sles12sp3_tf_img \
+--memory 1024 \
+--disk path=/VM/sles12sp3_tf_img.qcow2,size=30 \
+--vcpus 1 \
+--network network=vnet1,model=virtio \
+--os-type linux \
+--noautoconsole \
+--os-variant sles12sp3 \
+--graphics vnc \
+--location /var/lib/libvirt/images/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso \
+--initrd-inject=/VM/autoyast_SLES12SP3_for_cloud_image.xml \
+--extra-args kernel_args="console=/dev/ttyS0 autoyast=file://VM/autoyast_SLES12SP3_for_cloud_image.xml"
+#=============================================
+
+
 sript_start_time=$(date +%s)
 set -x
 TMPL_IMG=sles12sp3_clone_img.qcow2
@@ -60,7 +79,7 @@ sript_end_time=$(date +%s);script_runtime=$(((sript_end_time-sript_start_time)/6
 echo;echo "Runtime in minutes (clone operation): " $script_runtime
 
 ###############################
-sleep 45
+sleep 90
 ###############################
 
 set -ex 

@@ -51,13 +51,13 @@ _wait_for_all_VMs_up
 # DEPLOY SES CLUSTER
 #_run_script_on_remote_host $MASTER ${BASEDIR}/script/cluster_deploy.sh
 # configure rsyslog sending logs to journal
-#source  ${BASEDIR}/script/configure_rsyslog.sh
+source  ${BASEDIR}/script/configure_rsyslog.sh
 # perform basic cluster checks
 #_run_script_on_remote_host $MASTER ${BASEDIR}/script/basic_checks.sh
 # basic client tests *ses_client VM up and running*
 #source ${BASEDIR}/script/client_tests.sh
 # collect deployment logs
-# source ${BASEDIR}/script/collect_deployment_logs.sh
+source ${BASEDIR}/script/collect_deployment_logs.sh
 
 set +x
 # calculating script execution duration
