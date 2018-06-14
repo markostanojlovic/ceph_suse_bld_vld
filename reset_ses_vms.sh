@@ -98,6 +98,7 @@ do
 done
 cat /tmp/hostsfile
 cat /tmp/hostsfile >> /etc/hosts
+awk '!seen[$0]++' /etc/hosts > /tmp/hosts;cat /tmp/hosts > /etc/hosts
 
 # copy hosts file 
 for (( i=1; i <= $VM_NUM; i++ ))
