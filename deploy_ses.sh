@@ -20,10 +20,12 @@
 sript_start_time=$(date +%s)
 
 set -x
-# loading configuration
-source config/CONFIG
-# logs
-LOG_DIR=$(${BASEDIR}/script/log_init.sh|grep run)
+BASEDIR=$(find / -type d -name ceph_suse_bld_vld 2>/dev/null || echo > /dev/null)
+LOG_DIR=deployment_$(date +%Y_%m_%d_%H_%M)
+LOG_PATH=${BASEDIR}/log/${LOG_DIR}
+mkdir -p $LOG_PATH
+source ${BASEDIR}/config/CONFIG
+source ${BASEDIR}/script/helper.sh
 echo ${BASEDIR}/log/$LOG_DIR > ${BASEDIR}/config/LAST_DEPLOY_LOG_DIR
 # preparing the host
 source ${BASEDIR}/script/prepare_host.sh
@@ -49,13 +51,15 @@ sleep 60
 # wait until all VMs are up
 _wait_for_all_VMs_up
 # DEPLOY SES CLUSTER
-#_run_script_on_remote_host $MASTER ${BASEDIR}/script/cluster_deploy.sh
+set -x 
+ssh $MASTER 'bash -sex' < ${BASEDIR}/script/cluster_deploy.sh >${LOG_PATH}/cluster_deploy.log_$(date +%Y_%m_%d_%H_%M_%S) 2>&1
+[ $? -eq 0 ] && echo "Deployment OK" || exit 11
 # configure rsyslog sending logs to journal
 source  ${BASEDIR}/script/configure_rsyslog.sh
 # perform basic cluster checks
-#_run_script_on_remote_host $MASTER ${BASEDIR}/script/basic_checks.sh
+_run_script_on_remote_host $MASTER ${BASEDIR}/script/basic_checks.sh
 # basic client tests *ses_client VM up and running*
-#source ${BASEDIR}/script/client_tests.sh
+source ${BASEDIR}/script/client_tests.sh
 # collect deployment logs
 source ${BASEDIR}/script/collect_deployment_logs.sh
 

@@ -17,3 +17,4 @@ sed -i '/Transports/a Squash = No_Root_Squash;' /srv/salt/ceph/ganesha/files/gan
 sed -i "s|'openattic' in self.data\[node\]\['roles'\]|'openattic' in self.data\[node\]\['roles'\] and 'rgw' in self.data\[node\]\['roles'\]|" /srv/modules/runners/validate.py
 salt-run state.orch ceph.stage.4
 salt-call state.apply ceph.salt-api
+set +ex

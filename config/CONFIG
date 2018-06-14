@@ -9,5 +9,3 @@ MASTER_IP=${VMNET_IP_BASE}.${VM_IP_START}
 CLIENT_NODE=ses5node5
 CLUSTER_HEALTH_OK_TIMEOUT=300
 BASEDIR=$(find / -type d -name ceph_suse_bld_vld 2>/dev/null || echo > /dev/null)
-source ${BASEDIR}/script/helper.sh
-DEPLOY_LOG_DIR=${BASEDIR}/log/$(cat ${BASEDIR}/config/LAST_DEPLOY_LOG_DIR)

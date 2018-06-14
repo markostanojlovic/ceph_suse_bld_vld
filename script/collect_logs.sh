@@ -9,8 +9,9 @@ date2=${3}' '${4}
 script_name=$5
 
 # directory for storing logs
-LOG_DIR=${BASEDIR}/log/test_case-${script_name}-$(date +%Y_%m_%d_%H_%M)
-mkdir $LOG_DIR
+[[ -z $LOG_DIR ]] && LOG_DIR=$(cat $BASEDIR}/config/LAST_DEPLOY_LOG_DIR)
+TC_LOG_DIR=${BASEDIR}/log/${LOG_DIR}/test_case_${script_name}_$(date +%Y_%m_%d_%H_%M)
+mkdir $TC_LOG_DIR
 
 for (( NODE_NUMBER=1; NODE_NUMBER <=$VM_NUM; NODE_NUMBER++ ))
 do
@@ -18,8 +19,8 @@ do
   ssh ${VM_NAME_BASE}${NODE_NUMBER} chmod +x /tmp/get_journalctl_logs.sh
   ssh ${VM_NAME_BASE}${NODE_NUMBER} "journalctl --sync"
   ssh ${VM_NAME_BASE}${NODE_NUMBER} /tmp/get_journalctl_logs.sh $date1 $date2 $script_name
-  scp ${VM_NAME_BASE}${NODE_NUMBER}:/tmp/*_${script_name}_log ${LOG_DIR}/ 2>/dev/null
-  scp ${VM_NAME_BASE}${NODE_NUMBER}:/tmp/journal_err_log ${LOG_DIR}/journal_err_log_${VM_NAME_BASE}${NODE_NUMBER} 2>/dev/null
+  scp ${VM_NAME_BASE}${NODE_NUMBER}:/tmp/*_${script_name}_log ${TC_LOG_DIR}/ 2>/dev/null
+  scp ${VM_NAME_BASE}${NODE_NUMBER}:/tmp/journal_err_log ${TC_LOG_DIR}/journal_err_log_${VM_NAME_BASE}${NODE_NUMBER} 2>/dev/null
 done
 
-cp $6 $LOG_DIR/TEST_CASE_RUN_log
+cp $6 $TC_LOG_DIR/TEST_CASE_RUN_log
