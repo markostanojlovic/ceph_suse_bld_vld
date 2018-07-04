@@ -139,8 +139,12 @@ systemctl enable ntpd;systemctl start ntpd
 systemctl status ntpd >> $INIT_SCRIPT_LOG 2>&1
 # SCC REG
 zypper rr 1
+# trust always gpg key
+sed -i -e '/^# repo_gpgcheck/a\repo_gpgcheck = off' -e '/^# pkg_gpgcheck/a\pkg_gpgcheck = off' /etc/zypp/zypp.conf
+# allow vendor change 
+sed -i -e '/^# solver.allowVendorChange/a\solver.allowVendorChange = true' /etc/zypp/zypp.conf
 SUSEConnect -r 30452ce234918d23 -e mstanojlovic@suse.com
-SUSEConnect -p ses/5/x86_64 -r aa65051fefaa5750 -e mstanojlovic@suse.com 
+#SUSEConnect -p ses/5/x86_64 -r aa65051fefaa5750 -e mstanojlovic@suse.com 
 # verification
 #[[ $(SUSEConnect --status-text|grep Registered) ]] && echo "SLES is registered in SCC."
 # zypper update
@@ -162,13 +166,13 @@ ses1_wget_succes=1
 #ses2_wget_succes=1
 #ses3_wget_succes=1
 #wget $os_http_link 2>/dev/null || os_wget_succes=0
-#wget -P /tmp/ $ses_http_link_1 2>/dev/null || ses1_wget_succes=0
+wget -P /tmp/ $ses_http_link_1 2>/dev/null || ses1_wget_succes=0
 #wget $ses_http_link_2 2>/dev/null || ses2_wget_succes=0
 #wget $ses_http_link_3 2>/dev/null || ses3_wget_succes=0
 #DEF_ISO_REPO=$(zypper lr|tail -n 1| awk '{print $3}')
 #zypper mr -d $DEF_ISO_REPO
 #[[ $os_wget_succes = 1 ]] 2>/dev/null && zypper ar -t yast2 -c -f "iso:/?iso=/tmp/$ISO_MEDIA" SLES-OS-local
-#[[ $ses1_wget_succes = 1 ]] 2>/dev/null && zypper ar -t yast2 -c -f "iso:/?iso=/tmp/$ISO_MEDIA_SES_1" SESdvd1
+[[ $ses1_wget_succes = 1 ]] 2>/dev/null && zypper ar -t yast2 -c -f -G "iso:/?iso=/tmp/$ISO_MEDIA_SES_1" SESdvd1
 #[[ $ses2_wget_succes = 1 ]] 2>/dev/null && zypper ar -t yast2 -c -f "iso:/?iso=/tmp/$ISO_MEDIA_SES_2" SESdvd2
 #[[ $ses3_wget_succes = 1 ]] 2>/dev/null && zypper ar -t yast2 -c -f "iso:/?iso=/tmp/$ISO_MEDIA_SES_3" SESinternal
 zypper lr >> $INIT_SCRIPT_LOG 2>&1
