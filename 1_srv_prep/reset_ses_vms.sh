@@ -20,6 +20,8 @@
 # - VM template image
 # - libvirt pool for storing images 
 
+# User must have passwordless sudo privileges 
+
 #=============================================
 # SLES12SP3 image for cloud/terraform 
 #=============================================
