@@ -13,6 +13,7 @@
 # - apparmor disabled
 # - IPv6 disabled 
 # - Suse Firewall disabled 
+# - disabled hostname obtaining from DHCP
 # - ssh hey copied in .ssh/authorized_keys 
 
 # Most important vars to setup:
