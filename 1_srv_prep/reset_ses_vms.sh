@@ -48,8 +48,8 @@ source $1
 # TODO: check if they are running or existing  
 for (( i=1; i <= $VM_NUM; i++ ))
 do 
-  sudo virsh destroy ${NAME_BASE}${i}
-  sudo virsh undefine ${NAME_BASE}${i}
+  sudo virsh destroy ${NAME_BASE}${i} || echo "VM not running..."  # Force stop VMs (even if they are not running)
+  sudo virsh undefine ${NAME_BASE}${i} --nvram || echo "No VM..."  # Undefine VMs (--nvram option for aarch64)
 done
 sudo rm -rf ${POOL}/${NAME_BASE}*
 
@@ -100,8 +100,11 @@ do
 done
 cat /tmp/hostsfile
 sudo bash -c 'cat /tmp/hostsfile >> /etc/hosts'
+# removing duplicate lines 
 awk '!seen[$0]++' /etc/hosts > /tmp/hosts
+awk '!seen[$0]++' ~/.bashrc > /tmp/bashrc
 sudo cp /tmp/hosts /etc/hosts
+sudo cp /tmp/bashrc ~/.bashrc
 
 # copy hosts file 
 for (( i=1; i <= $VM_NUM; i++ ))
