@@ -25,6 +25,7 @@ set -x
 ./2_deploy/salt_setup.sh $1
 
 # SES DEPLOY
+source $1
 sed "s/__NAMEBASE__/${NAME_BASE}/g" cfg/policy.cfg.tmpl > cfg/policy.cfg
 scp cfg/policy.cfg root@${NAME_BASE}1:/tmp/
 ssh root@${NAME_BASE}1 'bash -s' < 2_deploy/ses_deploy_deepsea.sh
