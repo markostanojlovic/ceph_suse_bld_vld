@@ -1,0 +1,26 @@
+# Cluster assignment
+cluster-ceph/cluster/*.sls
+# Common configuration
+config/stack/default/global.yml
+config/stack/default/ceph/cluster.yml
+# Role assignment
+# MASTER
+role-master/cluster/__NAMEBASE__1*.sls
+# ADMIN
+role-admin/cluster/__NAMEBASE__[1234]*.sls
+# MON & MGR
+role-mon/cluster/__NAMEBASE__[123]*.sls
+role-mgr/cluster/__NAMEBASE__[123]*.sls
+# MDS
+role-mds/cluster/__NAMEBASE__[23]*.sls
+# IGW
+role-igw/cluster/__NAMEBASE__[12]*.sls
+# RGW
+role-rgw/cluster/__NAMEBASE__[13]*.sls
+# NFS-ganesha
+role-ganesha/cluster/__NAMEBASE__[34]*.sls
+# openAttic
+role-openattic/cluster/__NAMEBASE__5*.sls
+# Profile (Hardware) configuration
+profile-default/cluster/*.sls
+profile-default/stack/default/ceph/minions/*yml

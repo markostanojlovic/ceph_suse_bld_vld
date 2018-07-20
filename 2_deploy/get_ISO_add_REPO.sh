@@ -6,6 +6,8 @@
 # Downloading ISO image and adding it as repo on each host
 # Setting up zipper config 
 
+[[ -z $1 || -z $2 ]] && (echo "Error: Input arguments are missing.";echo "Usage example: ";echo "./2_deploy/get_ISO_add_REPO.sh 2_deploy/REPO_ISO_URL_x86_64 1_srv_prep/reset_ses_vms_maiax86.config";exit)
+
 iso_download_url=$(cat $1)
 iso_name=${iso_download_url##*/}
 source ../1_srv_prep/$2
@@ -22,3 +24,4 @@ do
   # add repo
   ssh root@${NAME_BASE}${i} zypper ar -c -f "iso:/?iso=/tmp/${iso_name}" SES
 done 
+
