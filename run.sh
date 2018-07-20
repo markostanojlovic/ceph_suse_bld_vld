@@ -39,6 +39,7 @@ ssh root@${NAME_BASE}1 'bash -sex' < 2_deploy/ses_deploy_deepsea.sh > ${LOG_PATH
 # TEST SUITE/TESTS
 ssh root@${NAME_BASE}1 'bash -sex' < 3_tests/01_basic_TCs/TC001_deployment_after_checks.sh > ${LOG_PATH}/TC001_checks.log 2>&1
 ssh root@${NAME_BASE}1 'bash -sex' < 3_tests/01_basic_TCs/TC002_rm_OSD_with_deepsea.sh > ${LOG_PATH}/TC002_rm_osd_ds.log 2>&1
+ssh root@${NAME_BASE}1 'bash -sex' < 3_tests/01_basic_TCs/TC003_add_OSD_with_deepsea.sh > ${LOG_PATH}/TC003_add_osd_ds.log 2>&1
 
 set +x
 # calculating script execution duration
