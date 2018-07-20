@@ -41,22 +41,34 @@
 # --extra-args kernel_args="console=/dev/ttyS0 autoyast=file://VM/autoyast_SLES12SP3_for_cloud_image.xml"
 #=============================================
 
+if [[ -z $1 ]]
+then
+  echo "ERROR: ENV_CONF argument missing."
+  echo "Example:"
+  echo "./1_srv_prep/reset_ses_vms.sh 1_srv_prep/reset_ses_vms_maiax86.config"
+  exit 1
+else
+  #read config file
+  source $1
+fi
+
 sript_start_time=$(date +%s)
 set -x
 
-# read config file 
-source $1
-
 # clean old 
-# TODO: check if they are running or existing  
 for (( i=1; i <= $VM_NUM; i++ ))
 do 
   sudo virsh destroy ${NAME_BASE}${i} || echo "VM not running..."  # Force stop VMs (even if they are not running)
   sudo virsh undefine ${NAME_BASE}${i} --nvram || echo "No VM..."  # Undefine VMs (--nvram option for aarch64)
 done
-sudo rm -rf ${POOL}/${NAME_BASE}*
 
-# TODO before cloning, check if clone VM is shut off
+if [[ -n $POOL && -n $NAME_BASE ]]
+then
+  sudo rm -rf ${POOL}/${NAME_BASE}* # **** !DANGER! rm -rf / if vars empty! ****
+fi
+
+# before cloning, shut off clone VM
+sudo virsh destroy $TMPL_VM_NAME || echo "Clone VM shut off: OK"
 
 # clone
 for (( i=1; i <= $VM_NUM; i++ ))
@@ -91,7 +103,8 @@ set -ex
 sudo sed -i '/StrictHostKeyChecking/c\StrictHostKeyChecking no' /etc/ssh/ssh_config
 sudo sed -i "/${NAME_BASE}/d" /etc/hosts
 sudo sed -i "/${NAME_BASE}/d" /root/.ssh/known_hosts
-> /tmp/hostsfile # TODO make sure the user has permissions on this file 
+sudo rm /tmp/hostsfile
+touch /tmp/hostsfile
 for (( i=1; i <= $VM_NUM; i++ ))
 do 
   vmip=$(sudo virsh domifaddr ${NAME_BASE}${i}|grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
