@@ -1,14 +1,20 @@
 #!/bin/bash
 # Name:		salt_setup.sh
 # Usage:	./2_deploy/salt_setup.sh ENV_CONF
-# Example:	./2_deploy/salt_setup.sh 1_srv_prep/reset_ses_vms_maiax86.config
+# Example:	./2_deploy/salt_setup.sh cfg/maiax86_64.cfg cfg/REPO_ISO_URL_x86_64
 # Desc:		Installing SALT-STACK and configuring master and minions
 
-[[ -z $1 ]] && (echo "Error: Input arguments are missing.";echo "Usage example: ";echo "./2_deploy/salt_setup.sh 1_srv_prep/reset_ses_vms_maiax86.config";exit)
+if [[ -z $1 ]]
+then
+  echo "ERROR: ENV_CONF argument missing."
+  echo "Example:"
+  echo "./2_deploy/salt_setup.sh cfg/maiax86_64.cfg cfg/REPO_ISO_URL_x86_64"
+  exit 1
+else 
+  source $1
+fi
 
-set -ex
-
-source $1
+set -x
 
 # configure salt master
 sudo rm /tmp/configure_salt_master.sh
@@ -48,10 +54,10 @@ do
 done 
 
 # waiting for salt-minions to be installed 
-sleep 120
+sleep 90
 
 # accept salt keys 
 ssh root@${NAME_BASE}1 "salt-key --accept-all -y;sleep 5;salt \* test.ping;salt-key --accept-all -y;slee 2;salt \* test.ping"
 
-set +ex
+set +x
 

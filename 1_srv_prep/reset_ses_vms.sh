@@ -1,10 +1,11 @@
 #!/bin/bash
-# Script name: reset_ses_vms.sh
-# USAGE: reset_ses_vms.sh reset_ses_vms__hostname_.config
+# Name: 	reset_ses_vms.sh
+# USAGE: 	reset_ses_vms.sh cfg/hostname_arch.config
 
 # Reseting the VMs for the test deployment of Ceph/SES cluster
 
 # What are the requirements of the clone image:
+# - installed pkgs: zypper in -y libvirt virt-install git-core #qemu-uefi-aarch64
 # - grub2 settings: /etc/default/grub; grub2-mkconfig -o /boot/grub2/grub.cfg 
 #     - console=ttyS0
 #     - GRUB_TIMEOUT=2
@@ -45,7 +46,7 @@ if [[ -z $1 ]]
 then
   echo "ERROR: ENV_CONF argument missing."
   echo "Example:"
-  echo "./1_srv_prep/reset_ses_vms.sh 1_srv_prep/reset_ses_vms_maiax86.config"
+  echo "./1_srv_prep/reset_ses_vms.sh cfg/maiax86_64.cfg cfg/REPO_ISO_URL_x86_64"
   exit 1
 else
   #read config file
@@ -64,6 +65,7 @@ done
 
 if [[ -n $POOL && -n $NAME_BASE ]]
 then
+  echo "Deleting old images..."
   sudo rm -rf ${POOL}/${NAME_BASE}* # **** !DANGER! rm -rf / if vars empty! ****
 fi
 
@@ -89,22 +91,17 @@ do
   sudo virsh start ${NAME_BASE}${i}
 done 
 
-set +x
-# calculating script execution duration
-sript_end_time=$(date +%s);script_runtime=$(((sript_end_time-sript_start_time)/60))
-echo;echo "Runtime in minutes (clone operation): " $script_runtime
-
 ###############################
 sleep 90
 ###############################
 
-set -ex 
 # get IPs of the VMs
 sudo sed -i '/StrictHostKeyChecking/c\StrictHostKeyChecking no' /etc/ssh/ssh_config
 sudo sed -i "/${NAME_BASE}/d" /etc/hosts
-sudo sed -i "/${NAME_BASE}/d" /root/.ssh/known_hosts
-sudo rm /tmp/hostsfile
+sudo sed -i "/${NAME_BASE}/d" ~/.ssh/known_hosts
+[[ -e /tmp/hostsfile ]] && sudo rm /tmp/hostsfile
 touch /tmp/hostsfile
+
 for (( i=1; i <= $VM_NUM; i++ ))
 do 
   vmip=$(sudo virsh domifaddr ${NAME_BASE}${i}|grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
@@ -129,7 +126,7 @@ do
   ssh root@${NAME_BASE}${i} "cat /tmp/hostsfile >> /etc/hosts"
 done
 
-set +ex
+set +x
 # calculating script execution duration
 sript_end_time=$(date +%s);script_runtime=$(((sript_end_time-sript_start_time)/60))
 echo;echo "Runtime in minutes : " $script_runtime

@@ -1,16 +1,21 @@
 #!/bin/bash
-# Script name: get_ISO_add_REPO.sh
-# Usage: get_ISO_add_REPO.sh __REPO__ __LOCAL_CONF__
-#        get_ISO_add_REPO.sh REPO_ISO_URL_x86_64 reset_ses_vms_maiax86.config
+# Name: 	get_ISO_add_REPO.sh
+# Usage: 	get_ISO_add_REPO.sh ENV_CONF_FILE_PATH REPO_URL_FILE_PATH
+# Example:      ./2_deploy/get_ISO_add_REPO.sh cfg/maiax86_64.cfg cfg/REPO_ISO_URL_x86_64
+# Desc:		Downloading ISO image and adding it as repo on each host
 
-# Downloading ISO image and adding it as repo on each host
-# Setting up zipper config 
+if [[ -z $1 || -z $2 ]]
+then
+  echo "ERROR: Arguments missing."
+  echo "Example:"
+  echo "./2_deploy/get_ISO_add_REPO.sh cfg/maiax86_64.cfg cfg/REPO_ISO_URL_x86_64"
+  exit 1
+else 
+  source $1
+fi
 
-[[ -z $1 || -z $2 ]] && (echo "Error: Input arguments are missing.";echo "Usage example: ";echo "./2_deploy/get_ISO_add_REPO.sh 2_deploy/REPO_ISO_URL_x86_64 1_srv_prep/reset_ses_vms_maiax86.config";exit)
-
-iso_download_url=$(cat $1)
+iso_download_url=$(cat $2)
 iso_name=${iso_download_url##*/}
-source ../1_srv_prep/$2
 
 # download iso
 for (( i=1; i <= $VM_NUM; i++ ))
