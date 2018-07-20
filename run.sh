@@ -15,6 +15,11 @@ fi
 sript_start_time=$(date +%s)
 set -x 
 
+# LOGS
+LOG_DIR=depl_$(date +%Y_%m_%d_%H_%M)
+LOG_PATH=log/${LOG_DIR}
+mkdir -p $LOG_PATH
+
 # VMs 
 ./1_srv_prep/reset_ses_vms.sh $1
 
@@ -28,10 +33,11 @@ set -x
 source $1
 sed "s/__NAMEBASE__/${NAME_BASE}/g" cfg/policy.cfg.tmpl > cfg/policy.cfg
 scp cfg/policy.cfg root@${NAME_BASE}1:/tmp/
-ssh root@${NAME_BASE}1 'bash -s' < 2_deploy/ses_deploy_deepsea.sh
+ssh root@${NAME_BASE}1 'bash -sex' < 2_deploy/ses_deploy_deepsea.sh > ${LOG_PATH}/TC001_ses_deploy_deepsea.log 2>&1
+[ $? -eq 0 ] && echo "Deployment OK" || exit 1
 
 # TEST SUITE
-
+ssh root@${NAME_BASE}1 'bash -sex' < 3_tests/01_basic_TCs/TC001_deployment_after_checks.sh > ${LOG_PATH}/TC001.log 2>&1
 
 set +x
 # calculating script execution duration
