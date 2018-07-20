@@ -53,7 +53,6 @@ else
   source $1
 fi
 
-sript_start_time=$(date +%s)
 set -x
 
 # clean old 
@@ -127,7 +126,3 @@ do
 done
 
 set +x
-# calculating script execution duration
-sript_end_time=$(date +%s);script_runtime=$(((sript_end_time-sript_start_time)/60))
-echo;echo "Runtime in minutes : " $script_runtime
-
