@@ -9,7 +9,9 @@ ceph osd pool delete cold-storage cold-storage --yes-i-really-really-mean-it
 ceph osd pool delete hot-storage hot-storage --yes-i-really-really-mean-it
 
 ceph osd pool create cold-storage 32 32 replicated
+ceph osd pool application enable cold-storage rbd
 ceph osd pool create hot-storage 32 32 replicated
+ceph osd pool application enable hot-storage rbd
 ceph osd tier add cold-storage hot-storage
 ceph osd tier cache-mode hot-storage writeback
 ceph osd tier set-overlay cold-storage hot-storage
