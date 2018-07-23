@@ -53,6 +53,8 @@ ssh root@${NAME_BASE}1 'bash -s' < $TC > ${LOG_PATH}/TC003_add_osd_ds.log 2>&1
 TC="3_tests/01_basic_TCs/TC004_rm_OSD_manually.sh";echo $TC
 scp 3_tests/helper.sh root@${NAME_BASE}2:/tmp/
 ssh root@${NAME_BASE}2 'bash -s' < $TC > ${LOG_PATH}/TC004_rm_OSD_manually.log 2>&1
+TC="3_tests/01_basic_TCs/TC005_cache_tier.sh";echo $TC
+ssh root@${NAME_BASE}1 'bash -s' < $TC > ${LOG_PATH}/TC005_cache_tier.log 2>&1
 
 ## Other TCs
 TC="3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh";echo $TC
