@@ -44,19 +44,19 @@ echo;echo "Runtime in minutes (deployment): " $script_runtime;echo
 
 ## Basic TCs
 scp 3_tests/helper.sh root@${NAME_BASE}1:/tmp/ # copy the helper.sh to the target node
-echo "3_tests/01_basic_TCs/TC001_deployment_after_checks.sh ..."
-ssh root@${NAME_BASE}1 'bash -s' < 3_tests/01_basic_TCs/TC001_deployment_after_checks.sh > ${LOG_PATH}/TC001_checks.log 2>&1
-echo "3_tests/01_basic_TCs/TC002_rm_OSD_with_deepsea.sh ..."
-ssh root@${NAME_BASE}1 'bash -s' < 3_tests/01_basic_TCs/TC002_rm_OSD_with_deepsea.sh > ${LOG_PATH}/TC002_rm_osd_ds.log 2>&1
-echo "3_tests/01_basic_TCs/TC003_add_OSD_with_deepsea.sh ..."
-ssh root@${NAME_BASE}1 'bash -s' < 3_tests/01_basic_TCs/TC003_add_OSD_with_deepsea.sh > ${LOG_PATH}/TC003_add_osd_ds.log 2>&1
-echo "3_tests/01_basic_TCs/TC004_rm_OSD_manually.sh ..."
+TC="3_tests/01_basic_TCs/TC001_deployment_after_checks.sh";echo $TC
+ssh root@${NAME_BASE}1 'bash -s' < $TC > ${LOG_PATH}/TC001_checks.log 2>&1
+TC="3_tests/01_basic_TCs/TC002_rm_OSD_with_deepsea.sh";echo $TC
+ssh root@${NAME_BASE}1 'bash -s' < $TC > ${LOG_PATH}/TC002_rm_osd_ds.log 2>&1
+TC="3_tests/01_basic_TCs/TC003_add_OSD_with_deepsea.sh";echo $TC
+ssh root@${NAME_BASE}1 'bash -s' < $TC > ${LOG_PATH}/TC003_add_osd_ds.log 2>&1
+TC="3_tests/01_basic_TCs/TC004_rm_OSD_manually.sh";echo $TC
 scp 3_tests/helper.sh root@${NAME_BASE}2:/tmp/
-ssh root@${NAME_BASE}2 'bash -s' < 3_tests/01_basic_TCs/TC004_rm_OSD_manually.sh > ${LOG_PATH}/TC004_rm_OSD_manually.log 2>&1
+ssh root@${NAME_BASE}2 'bash -s' < $TC > ${LOG_PATH}/TC004_rm_OSD_manually.log 2>&1
 
 ## Other TCs
-echo "3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh ..."
-ssh root@${NAME_BASE}1 'bash -s' < 3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh > ${LOG_PATH}/3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.log 2>&1
+TC="3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh";echo $TC
+ssh root@${NAME_BASE}1 'bash -s' < $TC > ${LOG_PATH}/3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.log 2>&1
 
 set +x
 # calculating script execution duration
