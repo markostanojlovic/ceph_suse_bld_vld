@@ -28,5 +28,7 @@ do
   ssh root@${NAME_BASE}${i} "sed -i -e '/^# solver.allowVendorChange/a\solver.allowVendorChange = true' /etc/zypp/zypp.conf"
   # add repo
   ssh root@${NAME_BASE}${i} zypper ar -c -f "iso:/?iso=/tmp/${iso_name}" SES
+  ssh root@${NAME_BASE}${i} zypper ref
+  ssh root@${NAME_BASE}${i} rpm --rebuilddb
 done 
 
