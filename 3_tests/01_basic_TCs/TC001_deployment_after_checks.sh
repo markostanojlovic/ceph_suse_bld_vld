@@ -19,6 +19,8 @@ ceph osd tree
 rados df
 ceph df
 
+echo "Result: OK"
+
 set +ex
 
 
