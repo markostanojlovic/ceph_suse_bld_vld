@@ -9,3 +9,9 @@ function _get_osd_id {
     osd_id=$(mount|grep ceph|awk -F 'ceph-' '{print $2}'|awk -F 'type' '{print $1}'|head -n 1|tr -d ' ')
     echo $osd_id
 }
+
+function _get_obj_map_osd_id {
+    obj_name=$1
+    osd_id=$(ceph osd map EC_rbd_pool $obj_name | awk -F "up" '{print $2}'|awk -F ',' '{print $2}')
+    echo $osd_id
+}
