@@ -25,7 +25,7 @@ sgdisk --zap-all /dev/${disk}
 sgdisk --clear --mbrtogpt /dev/${disk}
 lsblk
 
-echo "Result OK"
+echo "Result: OK"
 
 set +ex
 

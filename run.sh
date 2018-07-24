@@ -47,7 +47,7 @@ echo;echo "Runtime in minutes (deployment): " $script_runtime;echo
 ### Copying helper script to all hodes 
 for (( i=1; i <= $VM_NUM; i++ ))
 do 
-  scp rc/node_helper.sh root@${NAME_BASE}${i}:/tmp/
+  scp src/node_helper.sh root@${NAME_BASE}${i}:/tmp/
 done
 
 ## Basic TCs
@@ -63,17 +63,18 @@ done
 ./3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh $1 $LOG_PATH
 
 ########################################################
+set +x
 
 # CHECKING LOGS
-echo '====================================================='
+echo '========================================================================================='
 for TC_log in $(find ./${LOG_PATH}/ -name "TC*"|awk -F ':' '{print $1}')
 do 
   egrep -q "^Result: OK" $TC_log && echo 'Result: OK | '$TC_log || echo 'FAILED     | '$TC_log
 done
-echo '====================================================='
+echo '========================================================================================='
 
-set +x
 # calculating script execution duration
 sript_end_time=$(date +%s);script_runtime=$(((sript_end_time-sript_start_time)/60))
 echo;echo "Runtime in minutes : " $script_runtime
+echo
 
