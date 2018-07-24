@@ -1,26 +1,15 @@
 #!/bin/bash
 
-set -ex
+set -ex 
 
-ceph health detail
-ceph -s
-ceph osd lspools
-ceph osd pool ls
-ceph osd pool create test-pool 8 8 replicated
-ceph osd pool ls|grep test
-ceph osd pool rename test-pool pool-test
-ceph osd pool application enable pool-test rbd
-ceph mon stat
-ceph mon_status -f json-pretty
-ceph mon dump
-ceph quorum_status -f json-pretty
-ceph osd stat
-ceph osd tree
-rados df
-ceph df
+source src/helper.sh
+source_cfg $@
+echo $NAME_BASE
+LOG=$(setup_log_path $@)
+echo "Log path: " $LOG
+
+ssh root@$MASTER 'bash -s' < 3_tests/master/deployment_after_checks.sh > $LOG 2>&1
 
 echo "Result: OK"
 
-set +ex
-
-
+set +ex 

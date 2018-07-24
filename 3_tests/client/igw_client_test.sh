@@ -4,15 +4,14 @@ set -ex
 
 iSCSI_PORTAL=$1
 # checking and installing open-iscsi package
-INSTALLED=$(zypper se open-iscsi|grep open-iscsi|awk -F '|' '{print $1}'|tr -d ' ') # TODO find a better way to check it
-[[ -z $INSTALLED ]] && zypper in -y open-iscsi
+rpm -qa|grep open-iscsi || zypper in -y open-iscsi
 systemctl enable iscsid;systemctl start iscsid;systemctl status iscsid
 systemctl stop multipathd;systemctl disable multipathd 	# stop multipath if started
 partprobe
-iscsiadm -m node --logoutall=all 2>/tmp/igw_logoutall_err_log || cat /tmp/igw_logoutall_err_log
+iscsiadm -m node --logoutall=all || echo
 rm -rf /etc/iscsi/nodes/* || echo "Empty dir..."
 rm -rf /etc/iscsi/send_targets/* || echo "Empty dir..."
-iscsiadm -m discovery --type=st --portal=$iSCSI_PORTAL || exit 0
+iscsiadm -m discovery --type=st --portal=$iSCSI_PORTAL
 result=$(iscsiadm -m discovery --type=st --portal=$iSCSI_PORTAL|tail -n 1);target=iqn${result#*iqn};echo $target
 iscsiadm -m node -n $target --login
 sleep 1

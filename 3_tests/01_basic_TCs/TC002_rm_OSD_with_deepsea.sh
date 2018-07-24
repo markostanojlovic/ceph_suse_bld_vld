@@ -1,20 +1,15 @@
 #!/bin/bash
 
-set -ex
+set -ex 
 
-source /tmp/helper.sh
-ceph osd tree
-disk=$(_get_osd_disk_dev)
-osd_id=$(_get_osd_id)
-salt-run disengage.safety
-salt-run remove.osd $osd_id
-# verification
-ceph osd tree
-systemctl status ceph-osd@${osd_id}.service|grep Active|grep "inactive (dead)" && echo "Service down: OK"
-mount|grep ceph|grep $disk || echo "Disk unmounted: OK"
+source src/helper.sh
+source_cfg $@
+echo $NAME_BASE
+LOG=$(setup_log_path $@)
+echo "Log path: " $LOG
+
+ssh root@$MASTER 'bash -s' < 3_tests/master/rm_OSD_with_deepsea.sh > $LOG 2>&1
 
 echo "Result: OK"
 
-set +ex
-
-
+set +ex 

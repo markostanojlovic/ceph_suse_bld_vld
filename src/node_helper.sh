@@ -1,6 +1,6 @@
 # Helper functions that are shared among TC scripts
 # This helper functions can work on master and admin node, some functions are only dedicated for master
-# Scipt needs to be copied to master node before executing 
+# Scipt needs to be copied to /tmp at master node before executing 
 
 function _get_osd_disk_dev {
     disk=$(mount|grep ceph|awk -F '/' '{print $3}'|head -c 3)

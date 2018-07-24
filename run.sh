@@ -19,7 +19,6 @@ set -x
 LOG_DIR=depl_$(date +%Y_%m_%d_%H_%M)
 LOG_PATH=log/${LOG_DIR}
 mkdir -p $LOG_PATH
-alias ssh_master="ssh root@$MASTER"
 
 # VMs 
 ./1_srv_prep/reset_ses_vms.sh $1
@@ -41,29 +40,29 @@ ssh_master 'bash -s' < 2_deploy/ses_deploy_deepsea.sh > ${LOG_PATH}/TC001_ses_de
 sript_end_time=$(date +%s);script_runtime=$(((sript_end_time-sript_start_time)/60))
 echo;echo "Runtime in minutes (deployment): " $script_runtime;echo
 
+########################################################
 # TEST SUITE/TESTS
-# Populate helper.sh 
-#sed -i "2iMASTER=${MASTER}" 3_tests/helper.sh
-#sed -i "3iCLIENT_NODE=${NAME_BASE}5" 3_tests/helper.sh
+
+## Preparation 
+### Copying helper script to all hodes 
+for (( i=1; i <= $VM_NUM; i++ ))
+do 
+  scp rc/node_helper.sh root@${NAME_BASE}${i}:/tmp/
+done
 
 ## Basic TCs
-scp 3_tests/helper.sh root@${MASTER}:/tmp/ # copy the helper.sh to master node 
-TC="3_tests/01_basic_TCs/TC001_deployment_after_checks.sh";echo $TC
-ssh_master 'bash -s' < $TC > ${LOG_PATH}/TC001_checks.log 2>&1
-TC="3_tests/01_basic_TCs/TC002_rm_OSD_with_deepsea.sh";echo $TC
-ssh_master 'bash -s' < $TC > ${LOG_PATH}/TC002_rm_osd_ds.log 2>&1
-TC="3_tests/01_basic_TCs/TC003_add_OSD_with_deepsea.sh";echo $TC
-ssh_master 'bash -s' < $TC > ${LOG_PATH}/TC003_add_osd_ds.log 2>&1
-TC="3_tests/01_basic_TCs/TC004_rm_OSD_manually.sh";echo $TC
-sshmaster 'bash -s' < $TC > ${LOG_PATH}/TC004_rm_OSD_manually.log 2>&1
-TC="3_tests/01_basic_TCs/TC005_cache_tier.sh";echo $TC
-ssh_master 'bash -s' < $TC > ${LOG_PATH}/TC005_cache_tier.log 2>&1
-TC="3_tests/01_basic_TCs/TC006_EC.sh";echo $TC
-ssh_master 'bash -s' < $TC > ${LOG_PATH}/TC006_EC.log 2>&1
+./3_tests/01_basic_TCs/TC001_deployment_after_checks.sh $1 $LOG_PATH
+./3_tests/01_basic_TCs/TC002_rm_OSD_with_deepsea.sh $1 $LOG_PATH
+./3_tests/01_basic_TCs/TC003_add_OSD_with_deepsea.sh $1 $LOG_PATH
+./3_tests/01_basic_TCs/TC004_rm_OSD_manually.sh $1 $LOG_PATH
+./3_tests/01_basic_TCs/TC005_cache_tier.sh $1 $LOG_PATH
+./3_tests/01_basic_TCs/TC006_EC.sh $1 $LOG_PATH
+./3_tests/01_basic_TCs/TC007_igw_basic.sh $1 $LOG_PATH
 
 ## Other TCs
-TC="3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh";echo $TC
-ssh_master 'bash -s' < $TC > ${LOG_PATH}/3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.log 2>&1
+./3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh $1 $LOG_PATH
+
+########################################################
 
 set +x
 # calculating script execution duration

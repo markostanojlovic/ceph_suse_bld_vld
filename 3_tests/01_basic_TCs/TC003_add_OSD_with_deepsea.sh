@@ -1,17 +1,15 @@
 #!/bin/bash
 
-set -ex
+set -ex 
 
-ceph osd tree
-lsblk
-salt-run state.orch ceph.stage.3
-# verification
-ceph osd tree
-#systemctl status ceph-osd@${osd_id}.service|grep Active|grep "active" && echo "Service up: OK"
-mount|grep ceph
+source src/helper.sh
+source_cfg $@
+echo $NAME_BASE
+LOG=$(setup_log_path $@)
+echo "Log path: " $LOG
+
+ssh root@$MASTER 'bash -s' < 3_tests/master/add_OSD_with_deepsea.sh > $LOG 2>&1
 
 echo "Result: OK"
 
-set +ex
-
-
+set +ex 
