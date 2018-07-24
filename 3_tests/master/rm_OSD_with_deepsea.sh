@@ -2,7 +2,7 @@
 
 set -ex
 
-source /tmp/helper.sh
+source /tmp/node_helper.sh
 ceph osd tree
 disk=$(_get_osd_disk_dev)
 osd_id=$(_get_osd_id)

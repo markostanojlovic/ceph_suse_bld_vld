@@ -4,7 +4,7 @@
 
 set -ex
 
-source /tmp/helper.sh
+source /tmp/node_helper.sh
 
 # Preparation: delete pool and check if EC-profile already exists  
 ceph osd pool delete EC_rbd_pool EC_rbd_pool --yes-i-really-really-mean-it

@@ -25,6 +25,10 @@ salt-run state.orch ceph.stage.2
 salt-run state.orch ceph.stage.3
 sed -i "/Transports/a Squash = No_Root_Squash;" /srv/salt/ceph/ganesha/files/ganesha.conf.j2
 sed -i "s|'openattic' in self.data\[node\]\['roles'\]|'openattic' in self.data\[node\]\['roles'\] and 'rgw' in self.data\[node\]\['roles'\]|" /srv/modules/runners/validate.py
+# Any changes made to the iSCSI Gateway configuration using the lrbd command are not visible to DeepSea and openATTIC.
+# To import your manual changes, you need to export the iSCSI Gateway configuration to a file: 
+# /srv/salt/ceph/igw/cache/lrbd.conf
+# echo "igw_config: default-ui" >> /srv/pillar/ceph/stack/global.yml
 salt-run state.orch ceph.stage.4
 salt-call state.apply ceph.salt-api
 

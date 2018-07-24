@@ -34,7 +34,7 @@ source $1
 sed "s/__NAMEBASE__/${NAME_BASE}/g" cfg/policy.cfg.tmpl > cfg/policy.cfg
 scp cfg/policy.cfg root@${NAME_BASE}1:/tmp/
 echo "Deployment..."
-ssh_master 'bash -s' < 2_deploy/ses_deploy_deepsea.sh > ${LOG_PATH}/TC001_ses_deploy_deepsea.log 2>&1
+ssh root@$MASTER 'bash -s' < 2_deploy/ses_deploy_deepsea.sh > ${LOG_PATH}/TC001_ses_deploy_deepsea.log 2>&1
 [ $? -eq 0 ] && echo "Deployment OK" || exit 1
 
 sript_end_time=$(date +%s);script_runtime=$(((sript_end_time-sript_start_time)/60))
@@ -63,6 +63,14 @@ done
 ./3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh $1 $LOG_PATH
 
 ########################################################
+
+# CHECKING LOGS
+echo '====================================================='
+for TC_log in $(find ./${LOG_PATH}/ -name "TC*"|awk -F ':' '{print $1}')
+do 
+  egrep -q "^Result: OK" $TC_log && echo 'Result: OK | '$TC_log || echo 'FAILED     | '$TC_log
+done
+echo '====================================================='
 
 set +x
 # calculating script execution duration
