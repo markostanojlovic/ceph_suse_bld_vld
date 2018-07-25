@@ -58,6 +58,7 @@ done
 ./3_tests/01_basic_TCs/TC005_cache_tier.sh $1 $LOG_PATH
 ./3_tests/01_basic_TCs/TC006_EC.sh $1 $LOG_PATH
 ./3_tests/01_basic_TCs/TC007_igw_basic.sh $1 $LOG_PATH
+./3_tests/01_basic_TCs/TC008_RGW_basic.sh $1 $LOG_PATH
 
 ## Other TCs
 ./3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh $1 $LOG_PATH
@@ -66,6 +67,7 @@ done
 set +x
 
 # CHECKING LOGS
+echo
 echo '========================================================================================='
 for TC_log in $(find ./${LOG_PATH}/ -name "TC*"|awk -F ':' '{print $1}')
 do 
@@ -75,6 +77,7 @@ echo '==========================================================================
 
 # calculating script execution duration
 sript_end_time=$(date +%s);script_runtime=$(((sript_end_time-sript_start_time)/60))
-echo;echo "Runtime in minutes : " $script_runtime
+echo "Runtime in minutes : " $script_runtime
+echo '========================================================================================='
 echo
 
