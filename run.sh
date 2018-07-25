@@ -65,7 +65,7 @@ done
 
 ## Other TCs
 ./3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh $1 $LOG_PATH
-
+./3_tests/01_basic_TCs/TC012_rm_services_with_deepsea.sh $1 $LOG_PATH
 
 ########################################################
 set +x
