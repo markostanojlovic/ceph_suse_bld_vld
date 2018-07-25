@@ -9,7 +9,6 @@ echo $NAME_BASE
 LOG=$(setup_log_path $@)
 echo "Log path: " $LOG
 
-
 NFS_NODES=$(ssh root@$MASTER "salt -C I@roles:ganesha grains.item fqdn --out yaml|grep fqdn|sed 's/fqdn: //g'|tr -d ' '")
 for NODE in $NFS_NODES
 do 

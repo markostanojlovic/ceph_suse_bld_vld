@@ -65,23 +65,32 @@ done
 
 ## Other TCs
 ./3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh $1 $LOG_PATH
+
+## NFS
+./3_tests/04_NFS_TCs/TC001_NFS_active_passive_HA.sh $1 $LOG_PATH
+
+## Removing services
 ./3_tests/01_basic_TCs/TC012_rm_services_with_deepsea.sh $1 $LOG_PATH
 
 ########################################################
 set +x
 
+REPORT_SUMM=$LOG_PATH/REPORT_SUMMARY
+> $REPORT_SUMM
+
 # CHECKING LOGS
-echo
-echo '========================================================================================='
+echo 
+echo '=========================================================================================' >> $REPORT_SUMM
 for TC_log in $(find ./${LOG_PATH}/ -name "TC*"|awk -F ':' '{print $1}')
 do 
-  egrep -q "^Result: OK" $TC_log && echo 'Result: OK | '$TC_log || echo 'FAILED     | '$TC_log
+  egrep -q "^Result: OK" $TC_log && echo 'Result: OK | '$TC_log || echo 'FAILED     | '$TC_log >> $REPORT_SUMM
 done
-echo '========================================================================================='
-
+echo '=========================================================================================' >> $REPORT_SUMM
 # calculating script execution duration
 sript_end_time=$(date +%s);script_runtime=$(((sript_end_time-sript_start_time)/60))
-echo "Runtime in minutes : " $script_runtime
-echo '========================================================================================='
+echo "Runtime in minutes : " $script_runtime >> $REPORT_SUMM
+echo '=========================================================================================' >> $REPORT_SUMM
+
+cat $REPORT_SUMM
 echo
 

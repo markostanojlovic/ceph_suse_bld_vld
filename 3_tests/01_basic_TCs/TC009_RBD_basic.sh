@@ -14,6 +14,7 @@ POOL_NAME=rbd_test
 # Create pool
 ssh root@$MASTER ceph osd pool delete $POOL_NAME $POOL_NAME --yes-i-really-really-mean-it > $LOG 2>&1
 ssh root@$MASTER ceph osd pool create $POOL_NAME 16 16 replicated > $LOG 2>&1
+ssh root@$MASTER ceph osd pool application enable $POOL_NAME rbd > $LOG 2>&1
 
 # Copy client.admin keyring to Client Node 
 scp root@ses5node1:/etc/ceph/ceph.client.admin.keyring /tmp/ceph.client.admin.keyring

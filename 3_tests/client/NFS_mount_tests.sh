@@ -6,7 +6,7 @@
 set -ex
 
 [[ -n $1 ]] && NFS_IP_ADDRESS=$1 || (echo ERROR: Missing NFS IP. ; exit 1)
-timeout_limit=7   
+timeout_limit=10   
 MOUNT_OPTIONS_FILE=/tmp/mount_options_input_file
 ##### mount options input file #####
 echo "\
