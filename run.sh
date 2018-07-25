@@ -61,9 +61,11 @@ done
 ./3_tests/01_basic_TCs/TC008_RGW_basic.sh $1 $LOG_PATH
 ./3_tests/01_basic_TCs/TC009_RBD_basic.sh $1 $LOG_PATH
 ./3_tests/01_basic_TCs/TC010_NFS_ganesha_basic.sh $1 $LOG_PATH
+./3_tests/01_basic_TCs/TC011_CephFS_basic.sh $1 $LOG_PATH
 
 ## Other TCs
 ./3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh $1 $LOG_PATH
+
 
 ########################################################
 set +x
