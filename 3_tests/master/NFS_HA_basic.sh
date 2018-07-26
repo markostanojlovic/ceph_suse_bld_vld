@@ -20,7 +20,7 @@ function _get_fqdn_from_pillar_role {
 }
 
 function ha_ganesha_ip_failover {
-  PRIMARY=$(_get_fqdn_from_salt_grain_key NFS_HA_master)
+  PRIMARY=$(_get_fqdn_from_salt_grain_key NFS_HA_master|tail -n 1)
   #PRIM=${PRIMARY%%\.*}
   echo "Primary nfs-ganesha node is : " $PRIMARY
   SECONDARY=$(_get_fqdn_from_pillar_role ganesha|grep -v $PRIMARY)
@@ -47,8 +47,6 @@ function clear_NFS_HA {
   # crm resource cleanup nfs-ganesha-server # only clears logs
   salt -C 'I@roles:ganesha' cmd.run "systemctl stop hawk;systemctl stop pacemaker"
   salt -C 'I@roles:ganesha' cmd.run "zypper rm -y ha-cluster-bootstrap hawk pacemaker"
-  salt -C 'I@roles:ganesha' cmd.run "zypper rr ha-1"
-  salt -C 'I@roles:ganesha' cmd.run "rm -rf /root/.ssh/id_rsa*"
 }
 
 #######################################################################
@@ -61,6 +59,7 @@ salt -C 'I@roles:ganesha' cmd.run 'systemctl disable nfs-ganesha.service'
 
 # HA REPO setup 
 salt -C 'I@roles:ganesha' cmd.run 'wget -q -P /tmp/ http://mirror.suse.cz/install/SLE-12-HA-GM/SLE-12-HA-DVD-x86_64-GM-CD1.iso'
+salt -C 'I@roles:ganesha' cmd.run 'zypper rr ha-1 || echo "no ha-1 repo"'
 salt -C 'I@roles:ganesha' cmd.run 'zypper ar -t yast2 -c -f "iso:/?iso=/tmp/SLE-12-HA-DVD-x86_64-GM-CD1.iso" ha-1'
 salt -C 'I@roles:ganesha' cmd.run 'zypper in -y ha-cluster-bootstrap'
 
@@ -74,8 +73,7 @@ SECOND=$(_get_fqdn_from_pillar_role ganesha|grep -v $PRIMAR)
 HANODE1=$PRIMAR
 HANODE2=$SECOND
 salt -C 'I@roles:ganesha' cmd.run "sed -i '/StrictHostKeyChecking/c\StrictHostKeyChecking no' /etc/ssh/ssh_config"
-salt $HANODE1\* cmd.run 'ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa'
-salt $HANODE2\* cmd.run 'ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa'
+salt -L ${HANODE1},${HANODE2} cmd.run 'rm -f /root/.ssh/id_rsa*;ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa'
 PUBKEY_NODE1=$(salt $HANODE1 cmd.run 'cat /root/.ssh/id_rsa.pub' --out yaml|sed 's/.* ssh-rsa/ssh-rsa/g')
 PUBKEY_NODE2=$(salt $HANODE2 cmd.run 'cat /root/.ssh/id_rsa.pub' --out yaml|sed 's/.* ssh-rsa/ssh-rsa/g')
 ## configure cluster

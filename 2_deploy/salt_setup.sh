@@ -1,7 +1,7 @@
 #!/bin/bash
 # Name:		salt_setup.sh
 # Usage:	./2_deploy/salt_setup.sh ENV_CONF
-# Example:	./2_deploy/salt_setup.sh cfg/maiax86_64.cfg cfg/REPO_ISO_URL_x86_64
+# Example:	./2_deploy/salt_setup.sh cfg/maiax86_64.cfg 
 # Desc:		Installing SALT-STACK and configuring master and minions
 
 if [[ -z $1 ]]

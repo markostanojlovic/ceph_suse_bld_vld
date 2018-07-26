@@ -1,14 +1,14 @@
 #!/bin/bash
 # Name: 	run.sh
-# Usage:	./run.sh ENV_CONF_FILE_PATH REPO_URL_FILE_PATH
-# Example:	./run.sh cfg/maiax86_64.cfg cfg/REPO_ISO_URL_x86_64
+# Usage:	./run.sh ENV_CONF_FILE_PATH 
+# Example:	./run.sh cfg/maiax86_64.cfg 
 # Desc:		Runnig scripts for deploying and testing SES
 
-if [[ -z $1 || -z $2 ]]
+if [[ -z $1 ]]
 then
   echo "ERROR: ENV_CONF argument missing."
   echo "Example:"
-  echo "./run.sh cfg/maiax86_64.cfg cfg/REPO_ISO_URL_x86_64"
+  echo "./run.sh cfg/maiax86_64.cfg"
   exit 1
 fi
 
@@ -24,7 +24,7 @@ mkdir -p $LOG_PATH
 ./1_srv_prep/reset_ses_vms.sh $1
 
 # REPO ISO 
-./2_deploy/get_ISO_add_REPO.sh $1 $2
+./2_deploy/get_ISO_add_REPO.sh $1
 
 # SALT-STACK
 ./2_deploy/salt_setup.sh $1
@@ -93,4 +93,3 @@ echo '==========================================================================
 
 cat $REPORT_SUMM
 echo
-

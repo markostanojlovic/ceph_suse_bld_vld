@@ -45,8 +45,7 @@
 if [[ -z $1 ]]
 then
   echo "ERROR: ENV_CONF argument missing."
-  echo "Example:"
-  echo "./1_srv_prep/reset_ses_vms.sh cfg/maiax86_64.cfg cfg/REPO_ISO_URL_x86_64"
+  echo "./1_srv_prep/reset_ses_vms.sh cfg/maiax86_64.cfg"
   exit 1
 else
   #read config file

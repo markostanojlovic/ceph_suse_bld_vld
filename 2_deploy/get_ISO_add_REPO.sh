@@ -1,20 +1,20 @@
 #!/bin/bash
 # Name: 	get_ISO_add_REPO.sh
-# Usage: 	get_ISO_add_REPO.sh ENV_CONF_FILE_PATH REPO_URL_FILE_PATH
-# Example:      ./2_deploy/get_ISO_add_REPO.sh cfg/maiax86_64.cfg cfg/REPO_ISO_URL_x86_64
+# Usage: 	get_ISO_add_REPO.sh ENV_CONF_FILE_PATH 
+# Example:      ./2_deploy/get_ISO_add_REPO.sh cfg/maiax86_64.cfg 
 # Desc:		Downloading ISO image and adding it as repo on each host
 
-if [[ -z $1 || -z $2 ]]
+if [[ -z $1 ]]
 then
-  echo "ERROR: Arguments missing."
+  echo "ERROR: Argument missing."
   echo "Example:"
-  echo "./2_deploy/get_ISO_add_REPO.sh cfg/maiax86_64.cfg cfg/REPO_ISO_URL_x86_64"
+  echo "./2_deploy/get_ISO_add_REPO.sh cfg/maiax86_64.cfg"
   exit 1
 else 
   source $1
 fi
 
-iso_download_url=$(cat $2)
+iso_download_url=$REPO_URL
 iso_name=${iso_download_url##*/}
 
 # download iso
