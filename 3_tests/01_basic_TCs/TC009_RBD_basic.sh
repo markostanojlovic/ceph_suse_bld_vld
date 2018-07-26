@@ -17,8 +17,9 @@ ssh root@$MASTER ceph osd pool create $POOL_NAME 16 16 replicated > $LOG 2>&1
 ssh root@$MASTER ceph osd pool application enable $POOL_NAME rbd > $LOG 2>&1
 
 # Copy client.admin keyring to Client Node 
-scp root@ses5node1:/etc/ceph/ceph.client.admin.keyring /tmp/ceph.client.admin.keyring
-scp /tmp/ceph.client.admin.keyring root@ses5node5:/etc/ceph/
+sudo rm /tmp/ceph.client.admin.keyring 2>/dev/null || echo "File not found."
+scp root@$MASTER:/etc/ceph/ceph.client.admin.keyring /tmp/ceph.client.admin.keyring
+scp /tmp/ceph.client.admin.keyring root@${CLIENT_NODE}:/etc/ceph/
 
 # Run client test 
 ssh root@$CLIENT_NODE 'bash -s' < 3_tests/client/rbd_client_test.sh $POOL_NAME > $LOG 2>&1

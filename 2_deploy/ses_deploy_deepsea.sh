@@ -29,6 +29,8 @@ sed -i "s|'openattic' in self.data\[node\]\['roles'\]|'openattic' in self.data\[
 # To import your manual changes, you need to export the iSCSI Gateway configuration to a file: 
 # /srv/salt/ceph/igw/cache/lrbd.conf
 # echo "igw_config: default-ui" >> /srv/pillar/ceph/stack/global.yml
+# solving bug#1049669 problem with python socket module, gethostname()
+sed -i "s/, host=True//g" /srv/salt/ceph/igw/files/lrbd.conf.j2
 salt-run state.orch ceph.stage.4
 salt-call state.apply ceph.salt-api
 
