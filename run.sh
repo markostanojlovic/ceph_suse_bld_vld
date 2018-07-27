@@ -66,7 +66,7 @@ done
 ## Other TCs
 ./3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh $1 $LOG_PATH
 
-## NFS
+## NFS (only for x86_64)
 ./3_tests/04_NFS_TCs/TC001_NFS_active_passive_HA.sh $1 $LOG_PATH
 
 ## Removing services
@@ -83,7 +83,7 @@ echo
 echo '=========================================================================================' >> $REPORT_SUMM
 for TC_log in $(find ./${LOG_PATH}/ -name "TC*"|awk -F ':' '{print $1}')
 do 
-  egrep -q "^Result: OK" $TC_log && echo 'Result: OK | '$TC_log || echo 'FAILED     | '$TC_log >> $REPORT_SUMM
+  egrep -q "^Result: OK" $TC_log && echo 'Result: OK | '$TC_log  >> $REPORT_SUMM || echo 'FAILED     | '$TC_log >> $REPORT_SUMM
 done
 echo '=========================================================================================' >> $REPORT_SUMM
 # calculating script execution duration

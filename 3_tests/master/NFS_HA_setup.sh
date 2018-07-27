@@ -57,8 +57,8 @@ salt ${PRIMAR} cmd.run "crm status"
 salt ${PRIMAR} cmd.run "crm resource cleanup nfs-ganesha-server"
 salt ${PRIMAR} cmd.run "crm status"
 sleep 5
-salt ${PRIMAR} cmd.run "crm crm resource cleanup nfs-ganesha-server"
-alt ${PRIMAR} cmd.run "crm status"
+salt ${PRIMAR} cmd.run "crm resource cleanup nfs-ganesha-server"
+salt ${PRIMAR} cmd.run "crm status"
 
 echo "Result: OK"
 

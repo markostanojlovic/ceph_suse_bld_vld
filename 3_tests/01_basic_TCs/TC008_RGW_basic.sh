@@ -17,7 +17,7 @@ do
   ssh root@$MASTER "salt $NODE service.status ceph-radosgw@rgw.${NODE%\.*}|grep True"
   # get TCP port ss -l -p -n|grep tcp|grep rados
   TCP_PORT=$(ssh root@$NODE ss -l -p -n|grep tcp|grep rados|awk -F '*:' '{print $2}'|tr -d ' ')
-  ssh root@$CLIENT_NODE 'bash -s' < 3_tests/client/rgw_client_test.sh $NODE $TCP_PORT > $LOG 2>&1
+  ssh root@$CLIENT_NODE 'bash -s' < 3_tests/client/rgw_client_test.sh $NODE $TCP_PORT >> $LOG 2>&1
 done
 
 # Verify user is created for S3 interface

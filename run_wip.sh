@@ -83,7 +83,7 @@ echo
 echo '=========================================================================================' >> $REPORT_SUMM
 for TC_log in $(find ./${LOG_PATH}/ -name "TC*"|awk -F ':' '{print $1}')
 do 
-  egrep -q "^Result: OK" $TC_log && echo 'Result: OK | '$TC_log || echo 'FAILED     | '$TC_log >> $REPORT_SUMM
+  egrep -q "^Result: OK" $TC_log && echo 'Result: OK | '$TC_log  >> $REPORT_SUMM || echo 'FAILED     | '$TC_log >> $REPORT_SUMM
 done
 echo '=========================================================================================' >> $REPORT_SUMM
 # calculating script execution duration

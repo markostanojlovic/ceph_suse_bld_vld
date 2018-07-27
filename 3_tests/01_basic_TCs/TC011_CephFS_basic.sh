@@ -14,7 +14,7 @@ CLIENT_ADMIN_KEY=$(ssh root@$MASTER ceph auth list 2>/dev/null|grep -A 1 client.
 MDS_NODES=$(ssh root@$MASTER "salt -C I@roles:mds grains.item fqdn --out yaml|grep fqdn|sed 's/fqdn: //g'|tr -d ' '")
 for NODE in $MDS_NODES
 do 
-  ssh root@$CLIENT_NODE 'bash -s' < 3_tests/client/cephFS_client_test.sh $NODE $CLIENT_ADMIN_KEY > $LOG 2>&1
+  ssh root@$CLIENT_NODE 'bash -s' < 3_tests/client/cephFS_client_test.sh $NODE $CLIENT_ADMIN_KEY >> $LOG 2>&1
 done
 
 echo "Result: OK"

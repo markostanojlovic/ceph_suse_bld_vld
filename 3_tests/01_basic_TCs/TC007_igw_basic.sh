@@ -15,7 +15,7 @@ iSCSI_PORTAL=$(ssh root@$MASTER "salt -C I@roles:igw grains.item fqdn --out yaml
 for portal in $iSCSI_PORTAL
 do
         ssh root@$iSCSI_PORTAL 'lrbd -l;targetcli ls'
-        ssh root@${CLIENT_NODE} 'bash -s' < 3_tests/client/igw_client_test.sh $portal > $LOG 2>&1
+        ssh root@${CLIENT_NODE} 'bash -s' < 3_tests/client/igw_client_test.sh $portal >> $LOG 2>&1
 done
 
 echo "Result: OK"

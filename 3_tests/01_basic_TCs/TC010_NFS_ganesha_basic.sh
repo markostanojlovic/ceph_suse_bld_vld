@@ -13,7 +13,7 @@ NFS_NODES=$(ssh root@$MASTER "salt -C I@roles:ganesha grains.item fqdn --out yam
 for NODE in $NFS_NODES
 do 
   ssh root@$MASTER salt $NODE service.status nfs-ganesha|grep True
-  ssh root@$CLIENT_NODE 'bash -s' < 3_tests/client/NFS_mount_tests.sh $NODE > $LOG 2>&1
+  ssh root@$CLIENT_NODE 'bash -s' < 3_tests/client/NFS_mount_tests.sh $NODE >> $LOG 2>&1
 done
 
 echo "Result: OK"

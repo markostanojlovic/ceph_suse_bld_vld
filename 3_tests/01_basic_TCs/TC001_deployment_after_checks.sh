@@ -9,7 +9,7 @@ echo $NAME_BASE
 LOG=$(setup_log_path $@)
 echo "Log path: " $LOG
 
-ssh root@$MASTER 'bash -s' < 3_tests/master/deployment_after_checks.sh > $LOG 2>&1
+ssh root@$MASTER 'bash -s' < 3_tests/master/deployment_after_checks.sh >> $LOG 2>&1
 
 echo "Result: OK"
 
