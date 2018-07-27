@@ -13,7 +13,10 @@ echo $NAME_BASE
 LOG=$(setup_log_path $@)
 echo "Log path: " $LOG
 
-ssh root@$MASTER 'bash -s' < 3_tests/master/NFS_HA_basic.sh $NFS_HA_IP > $LOG 2>&1
+echo "NFS HA Setup:"
+ssh root@$MASTER 'bash -s' < 3_tests/master/NFS_HA_setup.sh $NFS_HA_IP >> $LOG 2>&1
+echo "NFS simple client test:"
+ssh root@$CLIENT_NODE 'bash -s' < 3_tests/client/NFS_simple.sh $NFS_HA_IP >> $LOG 2>&1
 
 echo "Result: OK"
 

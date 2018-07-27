@@ -11,42 +11,8 @@ else
 fi
 
 #######################################################################
-function _get_fqdn_from_salt_grain_key {
-  salt -C G@${1}:* grains.item fqdn --out yaml|grep fqdn|sed 's/fqdn: //g'|tr -d ' '
-}
-
 function _get_fqdn_from_pillar_role {
   salt -C I@roles:${1} grains.item fqdn --out yaml|grep fqdn|sed 's/fqdn: //g'|tr -d ' '
-}
-
-function ha_ganesha_ip_failover {
-  PRIMARY=$(_get_fqdn_from_salt_grain_key NFS_HA_master|tail -n 1)
-  #PRIM=${PRIMARY%%\.*}
-  echo "Primary nfs-ganesha node is : " $PRIMARY
-  SECONDARY=$(_get_fqdn_from_pillar_role ganesha|grep -v $PRIMARY)
-  #SEC=${SECONDARY%%\.*}
-  echo "Secondary nfs-ganesha node is : " $SECONDARY
-  CURR=$(salt ${PRIMARY} cmd.run "crm status"|grep ganesha-ip|awk '{print $4}')
-  echo 'Current ganesha-ip node is :' $CURR
-  if [[ $CURR == $PRIMARY ]]; then
-    failover_node=$SECONDARY
-  else
-    failover_node=$PRIMARY
-  fi
-  salt ${PRIMARY} cmd.run "crm resource migrate ganesha-ip $failover_node"
-  sleep 3 # adjustment period
-}
-
-function clear_NFS_HA {
-  PRIMARY=$(_get_fqdn_from_salt_grain_key NFS_HA_master)
-  PRIM=${PRIMARY%%\.*}
-  # crm resource show
-  salt ${PRIM} cmd.run "crm resource stop ganesha-ip"
-  salt ${PRIM} cmd.run "crm configure delete ganesha-ip"
-  # TODO remove servers from cluster - destroy cluster
-  # crm resource cleanup nfs-ganesha-server # only clears logs
-  salt -C 'I@roles:ganesha' cmd.run "systemctl stop hawk;systemctl stop pacemaker"
-  salt -C 'I@roles:ganesha' cmd.run "zypper rm -y ha-cluster-bootstrap hawk pacemaker"
 }
 
 #######################################################################
@@ -90,20 +56,9 @@ salt ${PRIMAR} cmd.run "crm configure commit"
 salt ${PRIMAR} cmd.run "crm status"
 salt ${PRIMAR} cmd.run "crm resource cleanup nfs-ganesha-server"
 salt ${PRIMAR} cmd.run "crm status"
-
-# NFS client test TODO
-
-# HA failover
-ha_ganesha_ip_failover
-
-# NFS client test TODO
-
-# HA failback
-ha_ganesha_ip_failover
-
-# NFS client test TODO
-
-# HA cleanup TODO
+sleep 5
+salt ${PRIMAR} cmd.run "crm crm resource cleanup nfs-ganesha-server"
+alt ${PRIMAR} cmd.run "crm status"
 
 echo "Result: OK"
 
