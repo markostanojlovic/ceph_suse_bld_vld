@@ -12,7 +12,7 @@ salt-run state.orch ceph.stage.5
 
 # verification
 salt '*' pillar.get roles
-for ROLE in igw rgw openattic ganesha mds
+for ROLE in igw rgw openattic ganesha
 do 
   salt '*' pillar.get roles|grep $ROLE && exit 1 || echo $ROLE " not in pillar roles"
 done 
