@@ -1,0 +1,23 @@
+## Basic TCs
+3_tests/01_basic_TCs/TC001_deployment_after_checks.sh 
+3_tests/01_basic_TCs/TC002_rm_OSD_with_deepsea.sh 
+3_tests/01_basic_TCs/TC003_add_OSD_with_deepsea.sh 
+3_tests/01_basic_TCs/TC004_rm_OSD_manually.sh 
+3_tests/01_basic_TCs/TC005_cache_tier.sh 
+3_tests/01_basic_TCs/TC006_EC.sh 
+3_tests/01_basic_TCs/TC007_igw_basic.sh 
+3_tests/01_basic_TCs/TC008_RGW_basic.sh 
+3_tests/01_basic_TCs/TC009_RBD_basic.sh 
+3_tests/01_basic_TCs/TC010_NFS_ganesha_basic.sh 
+3_tests/01_basic_TCs/TC011_CephFS_basic.sh 
+
+## Other TCs
+3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh 
+
+## NFS (only for x86_64)
+3_tests/04_NFS_TCs/TC001_NFS_active_passive_HA.sh 
+
+## Removing services
+3_tests/01_basic_TCs/TC012_rm_services_with_deepsea.sh 
+
+

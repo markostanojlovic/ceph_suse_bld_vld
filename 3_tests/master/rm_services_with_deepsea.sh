@@ -5,7 +5,7 @@ set -ex
 source /tmp/node_helper.sh
 
 cp /srv/pillar/ceph/proposals/policy.cfg /srv/pillar/ceph/proposals/policy.cfg.old
-sed -i '/igw/d;/rgw/d;/openattic/d;/ganesha/d;/mds/d' /srv/pillar/ceph/proposals/policy.cfg
+sed -i '/igw/d;/rgw/d;/openattic/d;/ganesha/d' /srv/pillar/ceph/proposals/policy.cfg
 
 salt-run state.orch ceph.stage.2
 salt-run state.orch ceph.stage.5

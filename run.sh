@@ -4,16 +4,18 @@
 # Example:	./run.sh cfg/maiax86_64.cfg 
 # Desc:		Runnig scripts for deploying and testing SES
 
+sript_start_time=$(date +%s)
+set -x 
+
 if [[ -z $1 ]]
 then
   echo "ERROR: ENV_CONF argument missing."
   echo "Example:"
   echo "./run.sh cfg/maiax86_64.cfg"
   exit 1
+else
+  source $1
 fi
-
-sript_start_time=$(date +%s)
-set -x 
 
 # LOGS
 LOG_DIR=depl_$(date +%Y_%m_%d_%H_%M)
@@ -30,7 +32,6 @@ mkdir -p $LOG_PATH
 ./2_deploy/salt_setup.sh $1
 
 # SES DEPLOY
-source $1
 sed "s/__NAMEBASE__/${NAME_BASE}/g" cfg/policy.cfg.tmpl > cfg/policy.cfg
 scp cfg/policy.cfg root@${NAME_BASE}1:/tmp/
 echo "Deployment..."
@@ -50,27 +51,10 @@ do
   scp src/node_helper.sh root@${NAME_BASE}${i}:/tmp/
 done
 
-## Basic TCs
-./3_tests/01_basic_TCs/TC001_deployment_after_checks.sh $1 $LOG_PATH
-./3_tests/01_basic_TCs/TC002_rm_OSD_with_deepsea.sh $1 $LOG_PATH
-./3_tests/01_basic_TCs/TC003_add_OSD_with_deepsea.sh $1 $LOG_PATH
-./3_tests/01_basic_TCs/TC004_rm_OSD_manually.sh $1 $LOG_PATH
-./3_tests/01_basic_TCs/TC005_cache_tier.sh $1 $LOG_PATH
-./3_tests/01_basic_TCs/TC006_EC.sh $1 $LOG_PATH
-./3_tests/01_basic_TCs/TC007_igw_basic.sh $1 $LOG_PATH
-./3_tests/01_basic_TCs/TC008_RGW_basic.sh $1 $LOG_PATH
-./3_tests/01_basic_TCs/TC009_RBD_basic.sh $1 $LOG_PATH
-./3_tests/01_basic_TCs/TC010_NFS_ganesha_basic.sh $1 $LOG_PATH
-./3_tests/01_basic_TCs/TC011_CephFS_basic.sh $1 $LOG_PATH
-
-## Other TCs
-./3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh $1 $LOG_PATH
-
-## NFS (only for x86_64)
-./3_tests/04_NFS_TCs/TC001_NFS_active_passive_HA.sh $1 $LOG_PATH
-
-## Removing services
-./3_tests/01_basic_TCs/TC012_rm_services_with_deepsea.sh $1 $LOG_PATH
+for test in $(egrep '^3_tests' $TEST_SUITE)
+do
+  ./${test} $1 $LOG_PATH
+done
 
 ########################################################
 set +x
@@ -81,9 +65,9 @@ REPORT_SUMM=$LOG_PATH/REPORT_SUMMARY
 # CHECKING LOGS
 echo 
 echo '=========================================================================================' >> $REPORT_SUMM
-for TC_log in $(find ./${LOG_PATH}/ -name "TC*"|awk -F ':' '{print $1}')
+for TC_log in $(find ./${LOG_PATH}/ -name "TC*log")
 do 
-  egrep -q "^Result: OK" $TC_log && echo 'Result: OK | '$TC_log  >> $REPORT_SUMM || echo 'FAILED     | '$TC_log >> $REPORT_SUMM
+  tail -n 3 $TC_log|grep -q "Result: OK" && echo 'Result: OK | '$TC_log  >> $REPORT_SUMM || echo 'FAILED     | '$TC_log >> $REPORT_SUMM
 done
 echo '=========================================================================================' >> $REPORT_SUMM
 # calculating script execution duration
