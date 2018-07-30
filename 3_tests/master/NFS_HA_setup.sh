@@ -56,9 +56,7 @@ salt ${PRIMAR} cmd.run "crm configure commit"
 salt ${PRIMAR} cmd.run "crm status"
 salt ${PRIMAR} cmd.run "crm resource cleanup nfs-ganesha-server"
 salt ${PRIMAR} cmd.run "crm status"
-sleep 5
-salt ${PRIMAR} cmd.run "crm resource cleanup nfs-ganesha-server"
-salt ${PRIMAR} cmd.run "crm status"
+sleep 90 # NFS grace period
 
 echo "Result: OK"
 

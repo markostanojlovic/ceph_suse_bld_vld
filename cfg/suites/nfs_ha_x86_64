@@ -1,0 +1,2 @@
+3_tests/01_basic_TCs/TC010_NFS_ganesha_basic.sh 
+3_tests/04_NFS_TCs/TC001_NFS_active_passive_HA.sh 

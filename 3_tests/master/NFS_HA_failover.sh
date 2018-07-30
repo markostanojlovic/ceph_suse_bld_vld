@@ -26,6 +26,7 @@ salt ${PRIMARY} cmd.run "crm resource migrate ganesha-ip $failover_node"
 sleep 30 # adjustment period
 salt ${PRIMARY} cmd.run "crm status"
 salt ${PRIMARY} cmd.run "crm status" | grep ganesha-ip | grep $failover_node
+sleep 90 # NFS grace period
 
 echo "Result: OK"
 
