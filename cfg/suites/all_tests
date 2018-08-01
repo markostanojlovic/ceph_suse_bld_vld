@@ -18,6 +18,6 @@
 3_tests/04_NFS_TCs/TC001_NFS_active_passive_HA.sh 
 
 ## Removing services
-3_tests/01_basic_TCs/TC012_rm_services_with_deepsea.sh 
+#3_tests/01_basic_TCs/TC012_rm_services_with_deepsea.sh 
 
 
