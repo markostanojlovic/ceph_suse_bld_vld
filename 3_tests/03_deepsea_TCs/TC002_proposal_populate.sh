@@ -9,14 +9,14 @@ echo $NAME_BASE
 LOG=$(setup_log_path $@)
 echo "Log path: " $LOG
 
-ssh root@$MASTER salt-run proposal.populate encryption=dmcrypt name=qatest >> $LOG 2>&1
+ssh root@$MASTER "salt-run proposal.populate encryption=dmcrypt name=qatest" >> $LOG 2>&1
 ssh root@$MASTER "cat \$(ls /srv/pillar/ceph/proposals/profile-qatest/stack/default/ceph/minions/*|tail -n 1 )" >> $LOG 2>&1
+
 # TODO make a better check, now, manuall check needs to be done 
 echo
-echo "DONT forget to manually check profiles!"
-echo "ssh root@$MASTER cat /srv/pillar/ceph/proposals/profile-qatest/stack/default/ceph/minions/*"
+echo "DONT forget to manually check profiles"
 echo
 
-echo "Result: OK"
+echo "Result: OK" >> $LOG 2>&1
 
 set +ex 
