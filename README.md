@@ -4,7 +4,9 @@ Deploy Ceph on local VMs and run number of test scripts.
 
 ## Preparation
 
-Adjust cfg/hostname_arch.cfg configuration file.
+- Adjust cfg/hostname_arch.cfg configuration file
+- Add iso http link to cfg/repo/ directory 
+- Choose tests in cfg/suites/all_tests_aarch64 
 
 Forkflow: 
 
@@ -16,5 +18,7 @@ Forkflow:
 3. Performin test scripts 
 4. Collecting logs (rsyslog)
 
+## How to run
 
+`./run.sh cfg/maiax86_64.cfg`
 
