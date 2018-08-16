@@ -1,22 +1,22 @@
 #!/bin/bash
 # This script is testing mount of NFS export with different mount options 
 # USAGE:
-# ./NFS_client_test.sh NFS_IP_ADDRESS
+# ./NFS_client_test.sh NFS_IP
 
-set -ex
+set -e
 
-[[ -n $1 ]] && NFS_IP_ADDRESS=$1 || (echo ERROR: Missing NFS IP. ; exit 1)
+[[ -n $1 ]] && NFS_IP=$1 || (echo ERROR: Missing NFS IP; exit 1)
 timeout_limit=10   
-MOUNT_OPTIONS_FILE=/tmp/mount_options_input_file
+MOUNTS=/tmp/mounts
 ##### mount options input file #####
 echo "\
 mount.nfs4 -o rw,hard,intr,noatime
 mount.nfs4 -o rw,soft,timeo=20,noatime 
 mount -t nfs 
 mount -t nfs -o rw,sync 
-mount.nfs4 " > $MOUNT_OPTIONS_FILE
+mount.nfs4 " > $MOUNTS
 ####################################
-mount_target="${NFS_IP_ADDRESS}:/ /mnt"
+mount_target="${NFS_IP}:/ /mnt"
 openssl rand -base64 10000000 -out /tmp/random.txt
 
 function test_command_for_timeout {
@@ -33,25 +33,19 @@ function test_command_for_timeout {
 
 mount|grep mnt && umount /mnt -f 
 # test ping
-ping -q -c 3 $NFS_IP_ADDRESS|grep " 0% packet loss" || ( echo "PING status: *** KO ***";exit 1 )
+ping -q -c 3 $NFS_IP|grep " 0% packet loss" || ( echo "PING status: *** KO ***";exit 1 )
 echo "PING status: OK " 
 # TESTING
 while read mount_options
 do
 sleep 60
-# test mount 
 test_command_for_timeout "$mount_options $mount_target"
-# test ls
 test_command_for_timeout "ls /mnt/cephfs"
-# test write 
 test_command_for_timeout "cp /tmp/random.txt /mnt/cephfs/nfs-ganesha_test_file_$(date +%H_%M_%S)"
-# test read 
 test_command_for_timeout "tail -n 1 /mnt/cephfs/nfs-ganesha_test_file_*"
-# test umount 
 test_command_for_timeout 'umount /mnt'
-done < $MOUNT_OPTIONS_FILE
+done < $MOUNTS
 
 echo 'Result: OK'
 
-set +ex
-
+set +e
