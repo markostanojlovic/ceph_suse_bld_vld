@@ -7,7 +7,7 @@ sed -i "s/default/default-no-update-no-reboot/g" /srv/salt/ceph/stage/prep/maste
 sed -i "s/default/default-no-update-no-reboot/g" /srv/salt/ceph/stage/prep/minion/init.sls
 
 # bug#1100083 workaround 
-sed -i 's/-collector/--collector/g' /srv/salt/ceph/monitoring/prometheus/exporters/node_exporter.sls
+#sed -i 's/-collector/--collector/g' /srv/salt/ceph/monitoring/prometheus/exporters/node_exporter.sls
 # bug with rpm database: Failed to cache rpm database (1).
 salt \* cmd.run "rpm --rebuilddb"
 

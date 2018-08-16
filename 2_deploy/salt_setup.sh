@@ -59,7 +59,7 @@ done
 sleep 90
 
 # accept salt keys 
-ssh root@${NAME_BASE}1 "salt-key --accept-all -y;sleep 5;salt \* test.ping;salt-key --accept-all -y;slee 2;salt \* test.ping"
+ssh root@${NAME_BASE}1 "salt-key --accept-all -y;sleep 5;salt \* test.ping;salt-key --accept-all -y;sleep 2;salt \* test.ping"
 
 set +x
 
