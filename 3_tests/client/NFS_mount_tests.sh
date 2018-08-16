@@ -38,6 +38,7 @@ echo "PING status: OK "
 # TESTING
 while read mount_options
 do
+sleep 60
 # test mount 
 test_command_for_timeout "$mount_options $mount_target"
 # test ls

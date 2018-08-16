@@ -22,3 +22,6 @@ Forkflow:
 
 `./run.sh cfg/maiax86_64.cfg`
 
+### Rerun the single test 
+
+`./3_tests/01_basic_TCs/TC010_NFS_ganesha_basic.sh cfg/maiax86_64.cfg`

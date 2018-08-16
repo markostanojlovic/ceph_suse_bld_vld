@@ -14,6 +14,7 @@ ssh root@$MASTER 'bash -s' < 3_tests/master/rm_services_with_deepsea.sh >> $LOG 
 # Add the services back
 ssh root@$MASTER mv /srv/pillar/ceph/proposals/policy.cfg.old /srv/pillar/ceph/proposals/policy.cfg
 ssh root@$MASTER salt-run state.orch ceph.stage.2
+salt -I cluster:ceph mine.update # why?
 ssh root@$MASTER salt-run state.orch ceph.stage.4
 
 echo "Result: OK"
