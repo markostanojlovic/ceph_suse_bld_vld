@@ -3,13 +3,13 @@ set -ex
 
 echo "deepsea_minions: '*'" > /srv/pillar/ceph/deepsea_minions.sls
 # disable restart in stage 0
-sed -i "s/default/default-no-update-no-reboot/g" /srv/salt/ceph/stage/prep/master/init.sls
-sed -i "s/default/default-no-update-no-reboot/g" /srv/salt/ceph/stage/prep/minion/init.sls
+sed -i "s/default/default-update-no-reboot/g" /srv/salt/ceph/stage/prep/master/init.sls
+sed -i "s/default/default-update-no-reboot/g" /srv/salt/ceph/stage/prep/minion/init.sls
 
 # bug#1100083 workaround 
 #sed -i 's/-collector/--collector/g' /srv/salt/ceph/monitoring/prometheus/exporters/node_exporter.sls
 # bug with rpm database: Failed to cache rpm database (1).
-salt \* cmd.run "rpm --rebuilddb"
+#salt \* cmd.run "rpm --rebuilddb"
 
 salt-run state.orch ceph.stage.0
 salt-run state.orch ceph.stage.1
