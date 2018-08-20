@@ -2,6 +2,7 @@
 # This script is testing mount of NFS export with different mount options 
 # USAGE:
 # ./NFS_client_test.sh NFS_IP
+# NOTE: sync option makes writes slow ~700KBps compared to 40+MBps
 
 set -ex
 
@@ -26,9 +27,9 @@ ping -q -c 3 $NFS_IP
 while read mount_options
 do
 sudo timeout $TIMEOUT $mount_options ${NFS_IP}:/ /mnt
-sudo timeout $TIMEOUT ls /mnt/cephfs
-sudo timeout $TIMEOUT cp /tmp/random.txt /mnt/cephfs/nfs-ganesha_test_file_$(date +%H_%M_%S)
-sudo timeout $TIMEOUT tail -n 1 /mnt/cephfs/nfs-ganesha_test_file_*
+ls /mnt/cephfs
+rsync -ah --progress /tmp/random.txt /mnt/cephfs/nfs-ganesha_test_file_$(date +%H_%M_%S)
+tail -n 1 /mnt/cephfs/nfs-ganesha_test_file_*
 sudo timeout $TIMEOUT umount /mnt
 done < $MOUNTS
 
