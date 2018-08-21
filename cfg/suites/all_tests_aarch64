@@ -17,6 +17,9 @@
 ## DeepSea TCs
 3_tests/03_deepsea_TCs/TC002_proposal_populate.sh
 
+## IGW
+3_tests/05_IGW_TCs/TC001_igw_custom_conf.sh
+
 ## Removing services
 #3_tests/01_basic_TCs/TC012_rm_services_with_deepsea.sh 
 

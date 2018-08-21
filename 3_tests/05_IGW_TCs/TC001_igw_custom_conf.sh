@@ -28,12 +28,34 @@ OFSSH
 NODES=$(ssh root@$MASTER "salt -C I@roles:igw grains.item fqdn --out yaml|grep fqdn|sed 's/fqdn: //g'|tr -d ' '")
 for NODE in $NODES
 do 
-  ssh root@$MASTER salt $NODE cmd.run 'lrbd -C'
+  ssh root@$MASTER "salt $NODE cmd.run 'lrbd -C'"
   HOSTNAME_FQDN=$NODE
 done
 
 HOSTNAME_SHORT=${HOSTNAME_FQDN%%\.*}
-TARGET_IP=$(salt ses5node1\* network.ip_addrs|egrep ".*[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}.*"|tr -d - |tr -d ' ')
+TARGET_IP=$(ssh root@$MASTER "salt ${HOSTNAME_SHORT}\* network.ip_addrs"|egrep ".*[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}.*"|tr -d - |tr -d ' ')
+TARGET=iqn.2016-11.org.linux-iscsi.igw.x86:sn.target1
+
+cat <<EOF > /tmp/igw_custom.conf
+{
+    "auth": [ { "target": "iqn.2016-11.org.linux-iscsi.igw.x86:sn.target1", "authentication": "none" } ],
+    "targets": [ { "target": "iqn.2016-11.org.linux-iscsi.igw.x86:sn.target1", "hosts": [ { "host": "$HOSTNAME_FQDN", "portal": "portal-$HOSTNAME_SHORT" } ] } ],
+    "portals": [ { "name": "portal-$HOSTNAME_SHORT", "addresses": [ "$TARGET_IP" ] } ],
+    "pools": [ { "pool": "$POOL_NAME", "gateways": [ { "target": "$TARGET", "tpg": [ { "image": "$IMG_NAME_1" }, { "image": "$IMG_NAME_2" } ] } ] } ]
+}
+EOF
+
+scp /tmp/igw_custom.conf root@${HOSTNAME_FQDN}:/tmp/
+
+ssh root@${HOSTNAME_FQDN} << EOSSH >> $LOG 2>&1
+cat /tmp/igw_custom.conf
+lrbd -f /tmp/igw_custom.conf
+lrbd
+targetcli /iscsi/${TARGET}/tpg1 enable
+targetcli ls 
+EOSSH
+
+ssh root@$CLIENT_NODE 'bash -s' < 3_tests/client/igw_client_test.sh $TARGET_IP >> $LOG 2>&1
 
 echo "Result: OK" >> $LOG 2>&1
 

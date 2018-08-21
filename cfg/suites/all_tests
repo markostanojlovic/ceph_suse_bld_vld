@@ -20,6 +20,9 @@
 ## NFS (only for x86_64)
 3_tests/04_NFS_TCs/TC001_NFS_active_passive_HA.sh 
 
+## IGW
+3_tests/05_IGW_TCs/TC001_igw_custom_conf.sh
+
 ## Removing services
 #3_tests/01_basic_TCs/TC012_rm_services_with_deepsea.sh 
 
