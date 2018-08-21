@@ -4,8 +4,10 @@
 
 # Reseting the VMs for the test deployment of Ceph/SES cluster
 
-# What are the requirements of the clone image:
-# - installed pkgs: zypper in -y libvirt virt-install git-core #qemu-uefi-aarch64
+# Installed pkgs on the host: 
+# zypper in -y libvirt virt-install git-core #qemu-uefi-aarch64
+
+# Clone img VM settings/configs:
 # - grub2 settings: /etc/default/grub; grub2-mkconfig -o /boot/grub2/grub.cfg 
 #     - console=ttyS0
 #     - GRUB_TIMEOUT=2
@@ -14,8 +16,9 @@
 # - apparmor disabled
 # - IPv6 disabled 
 # - Suse Firewall disabled 
-# - disabled hostname obtaining from DHCP
+# - disabled hostname obtaining from DHCP: /etc/sysconfig/network/dhcp:DHCLIENT_SET_HOSTNAME="no"
 # - ssh hey copied in .ssh/authorized_keys 
+# - cleaned /var/log/zypper.log logs 
 
 # Most important vars to setup:
 # - number of VMs
