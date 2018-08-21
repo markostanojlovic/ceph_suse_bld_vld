@@ -93,7 +93,7 @@ do
 done 
 
 ###############################
-sleep 90
+sleep 180 # TODO dynamicly check when VM is available with ssh 
 ###############################
 
 # get IPs of the VMs
