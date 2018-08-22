@@ -19,6 +19,7 @@
 
 ## IGW
 3_tests/05_IGW_TCs/TC001_igw_custom_conf.sh
+3_tests/05_IGW_TCs/TC002_igw_custom_conf.sh
 
 ## Removing services
 #3_tests/01_basic_TCs/TC012_rm_services_with_deepsea.sh 
