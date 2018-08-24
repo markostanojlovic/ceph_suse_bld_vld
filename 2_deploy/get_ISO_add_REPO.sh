@@ -2,7 +2,7 @@
 # Name: 	get_ISO_add_REPO.sh
 # Usage: 	get_ISO_add_REPO.sh ENV_CONF_FILE_PATH 
 # Example:      ./2_deploy/get_ISO_add_REPO.sh cfg/maiax86_64.cfg 
-# Desc:		Downloading ISO image and adding it as repo on each host
+# Desc:		Downloading ISO image on each host and adding it as repo
 
 if [[ -z $1 ]]
 then

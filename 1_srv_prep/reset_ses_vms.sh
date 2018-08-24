@@ -9,14 +9,14 @@
 
 # Clone img VM settings/configs:
 # - grub2 settings: /etc/default/grub; grub2-mkconfig -o /boot/grub2/grub.cfg 
-#     - console=ttyS0
+#     - console=ttyS0 or ttyAMA0,115200 for SLES12SP3
 #     - GRUB_TIMEOUT=2
 # - ntpd started and configured for : cz.pool.ntp.org
 # - repos are configured and image is patched to latest updates 
 # - apparmor disabled
 # - IPv6 disabled 
 # - Suse Firewall disabled 
-# - disabled hostname obtaining from DHCP: /etc/sysconfig/network/dhcp:DHCLIENT_SET_HOSTNAME="no"
+# - disabled hostname obtaining from DHCP: /etc/sysconfig/network/dhcp: DHCLIENT_SET_HOSTNAME="no"
 # - ssh hey copied in .ssh/authorized_keys 
 # - cleaned /var/log/zypper.log logs 
 
@@ -47,7 +47,7 @@
 
 if [[ -z $1 ]]
 then
-  echo "ERROR: ENV_CONF argument missing."
+  echo "ERROR: ENV_CONF argument missing. USAGE:"
   echo "./1_srv_prep/reset_ses_vms.sh cfg/maiax86_64.cfg"
   exit 1
 else
@@ -99,7 +99,8 @@ sleep 180 # TODO dynamicly check when VM is available with ssh
 # get IPs of the VMs
 sudo sed -i '/StrictHostKeyChecking/c\StrictHostKeyChecking no' /etc/ssh/ssh_config
 sudo sed -i "/${NAME_BASE}/d" /etc/hosts
-sudo sed -i "/${NAME_BASE}/d" ~/.ssh/known_hosts
+#sudo sed -i "/${NAME_BASE}/d" ~/.ssh/known_hosts
+rm -f ~/.ssh/known_hosts
 [[ -e /tmp/hostsfile ]] && sudo rm /tmp/hostsfile
 touch /tmp/hostsfile
 
@@ -108,9 +109,8 @@ do
   vmip=$(sudo virsh domifaddr ${NAME_BASE}${i}|grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
   echo $vmip ${NAME_BASE}${i}
   ssh root@${vmip} "hostnamectl set-hostname --static ${NAME_BASE}${i}.${DOMAIN_NAME}" 
-  #ssh root@${vmip} "SUSEConnect -p ses/5/x86_64 -r aa65051fefaa5750 -e mstanojlovic@suse.com"
   echo $vmip ${NAME_BASE}${i}.${DOMAIN_NAME} ${NAME_BASE}${i} >> /tmp/hostsfile
-  echo alias ${NAME_BASE}${i}="'ssh root@${NAME_BASE}${i}'" >> ~/.bashrc # adding aliases 
+  echo alias ${NAME_BASE}${i}="'ssh root@${NAME_BASE}${i}'" >> ~/.bashrc
 done
 cat /tmp/hostsfile
 sudo bash -c 'cat /tmp/hostsfile >> /etc/hosts'
