@@ -19,6 +19,7 @@ DEPL_SCRIPT=/tmp/salt_ses_deploy.sh
 cat <<EOF > $DEPL_SCRIPT
 set +x
 salt-run state.orch ceph.stage.0
+salt '*' cmd.run 'zypper up -y'
 salt-run state.orch ceph.stage.1
 cp /tmp/policy.cfg /srv/pillar/ceph/proposals/policy.cfg
 salt-run state.orch ceph.stage.2
