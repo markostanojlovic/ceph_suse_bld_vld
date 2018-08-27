@@ -1,70 +1,72 @@
 #!/bin/bash
-# TODO most EDIT !!! ****
+# NOTES: 
+# 	- only 3 mons: nodes 1,2,3 
+#	- rgw deployed at node 2 
 
-
-
-# deploy SES 
-cat <<EOF > /tmp/deploy_SES.sh
-function _wait_health_ok {
-  timer_checkpoint=\$(date +%s)
-  timer=300
-  while sleep 5 
-  do
-    dif=\$((( \$(date +%s)-\$timer_checkpoint )))
-    if [[ \$dif -le \$timer ]]
-    then 
-      if [[ \$(ceph health|head -n 1) -eq "HEALTH_OK" ]]
-        then 
-        echo "HEALTH_OK"
-        break 
-      fi
-    else
-      echo "Error: Ceph HEALTH TIMEOUT!"
-      break 
-    fi
-  done
-}
+if [[ -z $1 ]]
+then
+  echo "ERROR: argument missing. USAGE: ./1_srv_prep/reset_ses_vms.sh cfg/maiax86_64.cfg"
+  exit 1
+else
+  source $1
+fi
 
 set -x
-# installs ceph on each node
-ceph-deploy install ses4qa1 ses4qa2 ses4qa3 ses4qa4 ses4qa5
-# configures mon nodes
-ceph-deploy new ses4qa1 ses4qa2 ses4qa3
-# start mon service
+
+NODES=''
+for (( i=1; i <= $VM_NUM; i++ ))
+do
+  ssh root@${NAME_BASE}${i} <<EOSSH
+useradd -m cephadm
+echo 'cephadm:qa.adm-01'|chpasswd
+echo "cephadm ALL = (root) NOPASSWD:ALL" >> /etc/sudoers
+sed -i '/StrictHostKeyChecking/c\StrictHostKeyChecking no' /etc/ssh/ssh_config
+su - cephadm
+ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
+EOSSH
+  NODES="${NAME_BASE}${i} $NODES"
+done
+
+OSD_LIST=''
+ADMIN_NODE_SSH=$(ssh root@$MASTER cat /home/cephadm/.ssh/id_rsa.pub)
+for (( i=2; i <= $VM_NUM; i++ ))
+do
+  ssh root@${NAME_BASE}${i} "echo $ADMIN_NODE_SSH|tee -a /home/cephadm/.ssh/authorized_keys"
+  OSD_LIST="${NAME_BASE}${i}:vda ${NAME_BASE}${i}:vdb ${NAME_BASE}${i}:vdc ${NAME_BASE}${i}:vdd $OSD_LIST"
+done
+
+ssh root@$MASTER "cat /root/.ssh/authorized_keys|tee -a /home/cephadm/.ssh/authorized_keys"
+
+ssh cephadm@$MASTER <<EOSSH
+set -x
+sudo zypper in -y ceph ceph-deploy
+ceph-deploy install $NODES
+ceph-deploy new ${NAME_BASE}1 ${NAME_BASE}2 ${NAME_BASE}3
 ceph-deploy mon create-initial
-# configure admin node by creating keyring file 
-ceph-deploy admin ses4qa1 ses4qa2 ses4qa3 ses4qa4 ses4qa5
-# configure OSDs
-ceph-deploy osd prepare \
-ses4qa2:vdb ses4qa2:vdc ses4qa2:vdd ses4qa2:vde \
-ses4qa3:vdb ses4qa3:vdc ses4qa3:vdd ses4qa3:vde \
-ses4qa4:vdb ses4qa4:vdc ses4qa4:vdd ses4qa4:vde \
-ses4qa5:vdb ses4qa5:vdc ses4qa5:vdd ses4qa5:vde
-
-
-# create few pools to avoid "too few PGs per OSD"
-sudo ceph osd pool create iscsi 128 128
-
-# wait until cluster is stable
-_wait_health_ok
-
-# DEPLOY RGW 
-ceph-deploy install --rgw ses4qa2
-ceph-deploy --overwrite-conf rgw  create ses4qa2
-## verify:
-rgw_service_status=\$(ssh ses4qa2 "systemctl status ceph-radosgw@rgw.ses4qa2.service"|grep Active)
-echo \$rgw_service_status|grep "active (running)" || echo "Error: RGW service KO."
-curl ses4qa2:7480
-
+ceph-deploy admin $NODES
+ceph-deploy osd prepare $OSD_LIST
+sleep 10
 set +x
-EOF
+EOSSH
 
-scp /tmp/deploy_SES.sh root@${NAME_BASE}1:/tmp/
-ssh root@${NAME_BASE}1 "chmod +x /tmp/deploy_SES.sh"
-ssh root@${NAME_BASE}1 "su - cephadm -c 'source /tmp/deploy_SES.sh'"
+# bug# workaround 
+for (( i=2; i <= $VM_NUM; i++ ))
+do
+  ssh root@${NAME_BASE}${i} "reboot"
+done
+sleep 90
 
-# DEPLOY OPEN-ATTIC @5th node 
-cat <<EOF > /tmp/deploy_openAttic.sh
+ssh cephadm@$MASTER <<EOSSH
+sudo ceph osd pool create iscsi 64 64
+sudo ceph osd pool create rbd 64 64
+sudo ceph osd pool create nfs 64 64
+sleep 180
+#DEPLOY RGW 
+ceph-deploy install --rgw ${NAME_BASE}2
+ceph-deploy --overwrite-conf rgw  create ${NAME_BASE}2
+EOSSH
+
+cat <<EOF > /tmp/deploy_openAttic_SES4.sh
 set -x
 sudo zypper in -y openattic
 sudo ceph auth add client.openattic mon 'allow *' osd 'allow *'
@@ -78,73 +80,73 @@ curl ses4qa5:80
 set +x
 EOF
 
-scp /tmp/deploy_openAttic.sh root@${NAME_BASE}5:/tmp/
-ssh root@${NAME_BASE}5 "chmod +x /tmp/deploy_openAttic.sh"
-ssh root@${NAME_BASE}5 "su - cephadm -c 'source /tmp/deploy_openAttic.sh'"
+#scp /tmp/deploy_openAttic.sh root@${NAME_BASE}5:/tmp/
+#ssh root@${NAME_BASE}5 "chmod +x /tmp/deploy_openAttic.sh"
+#ssh root@${NAME_BASE}5 "su - cephadm -c 'source /tmp/deploy_openAttic.sh'"
 
-ses4qa3_ip_addr=$(cat /etc/hosts|grep ses4qa3|awk '{print $1}')
-
-# DEPLOY IGW @3rd node 
-cat <<EOF > /tmp/lrbd.conf
-{
-    "auth": [
-        {
-            "target": "iqn.2003-01.org.linux-iscsi.iscsi.x86:demo",
-            "authentication": "none"
-        }
-    ],
-    "targets": [
-        {
-            "target": "iqn.2003-01.org.linux-iscsi.iscsi.x86:demo",
-            "hosts": [
-                {
-                    "host": "ses4qa3.qatest",
-                    "portal": "east"
-                }
-            ]
-        }
-    ],
-    "portals": [
-        {
-            "name": "east",
-            "addresses": [
-                "$ses4qa3_ip_addr"
-            ]
-        }
-    ],
-    "pools": [
-        {
-            "pool": "iscsi",
-            "gateways": [
-                {
-                    "target": "iqn.2003-01.org.linux-iscsi.iscsi.x86:demo",
-                    "tpg": [
-                        {
-                            "image": "demo"
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
-    }
-EOF
-
-cat <<EOF > /tmp/deploy_IGW.sh
-set -x
-sudo rbd -p iscsi create --size=2G demo
-sudo rbd -p iscsi ls 
-sudo zypper in -y -t pattern ceph_iscsi 
-sudo systemctl enable lrbd
-sudo lrbd -f /tmp/lrbd.conf 
-sudo systemctl start lrbd 
-sudo systemctl status lrbd -l 
-sudo targetcli ls 
-set +x
-EOF
-
-scp /tmp/lrbd.conf root@${NAME_BASE}3:/tmp/
-scp /tmp/deploy_IGW.sh root@${NAME_BASE}3:/tmp/
-ssh root@${NAME_BASE}3 "chmod +x /tmp/deploy_IGW.sh"
-ssh root@${NAME_BASE}3 "su - cephadm -c 'source /tmp/deploy_IGW.sh'"
-
+#ses4qa3_ip_addr=$(cat /etc/hosts|grep ses4qa3|awk '{print $1}')
+#
+## DEPLOY IGW @3rd node 
+#cat <<EOF > /tmp/lrbd.conf
+#{
+#    "auth": [
+#        {
+#            "target": "iqn.2003-01.org.linux-iscsi.iscsi.x86:demo",
+#            "authentication": "none"
+#        }
+#    ],
+#    "targets": [
+#        {
+#            "target": "iqn.2003-01.org.linux-iscsi.iscsi.x86:demo",
+#            "hosts": [
+#                {
+#                    "host": "ses4qa3.qatest",
+#                    "portal": "east"
+#                }
+#            ]
+#        }
+#    ],
+#    "portals": [
+#        {
+#            "name": "east",
+#            "addresses": [
+#                "$ses4qa3_ip_addr"
+#            ]
+#        }
+#    ],
+#    "pools": [
+#        {
+#            "pool": "iscsi",
+#            "gateways": [
+#                {
+#                    "target": "iqn.2003-01.org.linux-iscsi.iscsi.x86:demo",
+#                    "tpg": [
+#                        {
+#                            "image": "demo"
+#                        }
+#                    ]
+#                }
+#            ]
+#        }
+#    ]
+#    }
+#EOF
+#
+#cat <<EOF > /tmp/deploy_IGW.sh
+#set -x
+#sudo rbd -p iscsi create --size=2G demo
+#sudo rbd -p iscsi ls 
+#sudo zypper in -y -t pattern ceph_iscsi 
+#sudo systemctl enable lrbd
+#sudo lrbd -f /tmp/lrbd.conf 
+#sudo systemctl start lrbd 
+#sudo systemctl status lrbd -l 
+#sudo targetcli ls 
+#set +x
+#EOF
+#
+#scp /tmp/lrbd.conf root@${NAME_BASE}3:/tmp/
+#scp /tmp/deploy_IGW.sh root@${NAME_BASE}3:/tmp/
+#ssh root@${NAME_BASE}3 "chmod +x /tmp/deploy_IGW.sh"
+#ssh root@${NAME_BASE}3 "su - cephadm -c 'source /tmp/deploy_IGW.sh'"
+#
