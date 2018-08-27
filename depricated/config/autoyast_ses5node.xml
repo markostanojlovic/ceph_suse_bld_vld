@@ -143,8 +143,8 @@ zypper rr 1
 sed -i -e '/^# repo_gpgcheck/a\repo_gpgcheck = off' -e '/^# pkg_gpgcheck/a\pkg_gpgcheck = off' /etc/zypp/zypp.conf
 # allow vendor change 
 sed -i -e '/^# solver.allowVendorChange/a\solver.allowVendorChange = true' /etc/zypp/zypp.conf
-SUSEConnect -r 30452ce234918d23 -e mstanojlovic@suse.com
-#SUSEConnect -p ses/5/x86_64 -r aa65051fefaa5750 -e mstanojlovic@suse.com 
+#SUSEConnect -r secretcodexxx -e mstanojlovic@suse.com
+#SUSEConnect -p ses/5/x86_64 -r secretcodexxx -e mstanojlovic@suse.com 
 # verification
 #[[ $(SUSEConnect --status-text|grep Registered) ]] && echo "SLES is registered in SCC."
 # zypper update
