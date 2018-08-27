@@ -28,6 +28,9 @@ salt-run state.orch ceph.stage.1
 cp /tmp/policy.cfg /srv/pillar/ceph/proposals/policy.cfg
 salt-run state.orch ceph.stage.2
 salt-run state.orch ceph.stage.3
+# bug#1104933 workaround
+salt --async -C I@roles:storage system.reboot
+sleep 90
 salt-run state.orch ceph.stage.4
 EOF
 
@@ -55,13 +58,21 @@ sudo systemctl enable rpcbind rpc-statd
 sudo systemctl start rpcbind rpc-statd
 sudo systemctl enable nfs-ganesha
 sudo systemctl start nfs-ganesha
+sleep 2
 showmount -e
+EOF
+
+# bug#1106077 workaround 
+IGW_SCRIPT=/tmp/igw_workaround.sh
+cat <<EOF > $IGW_SCRIPT
+rbd -p rbd create demo --size=5G
+rbd -p rbd ls
+systemctl restart lrbd.service
 EOF
 
 # Deployment
 ssh root@$MASTER 'bash -sx' < $DEPL_SCRIPT
-[ $? -eq 0 ] && echo "Deployment OK" || exit 1
-
+ssh root@${NAME_BASE}2 'bash -sx' < $IGW_SCRIPT
 ssh root@${NAME_BASE}4 'bash -sx' < $NFS_DEPL
 
 echo "Result: OK"
