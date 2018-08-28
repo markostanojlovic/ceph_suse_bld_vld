@@ -2,6 +2,8 @@
 # NOTES: 
 # 	- only 3 mons: nodes 1,2,3 
 #	- rgw deployed at node 2 
+#	- oA has to be deployed on admin node, in this is node 5 
+#	- igw deployed at node 3
 
 if [[ -z $1 ]]
 then
@@ -56,6 +58,7 @@ do
 done
 sleep 90
 
+#---------------------------------------------------------------------------
 ssh cephadm@$MASTER <<EOSSH
 sudo ceph osd pool create iscsi 64 64
 sudo ceph osd pool create rbd 64 64
@@ -65,88 +68,53 @@ sleep 180
 ceph-deploy install --rgw ${NAME_BASE}2
 ceph-deploy --overwrite-conf rgw  create ${NAME_BASE}2
 EOSSH
+#---------------------------------------------------------------------------
 
+#---------------------------------------------------------------------------
+# openAttic 
+# REQUIREMENT: node has to be admin node, run as root
 cat <<EOF > /tmp/deploy_openAttic_SES4.sh
-set -x
-sudo zypper in -y openattic
-sudo ceph auth add client.openattic mon 'allow *' osd 'allow *'
-sudo ceph auth get client.openattic -o /etc/ceph/ceph.client.openattic.keyring
-sudo chmod 660 /etc/ceph/ceph.client.openattic.keyring
-sudo chown openattic:openattic /etc/ceph/ceph.client.openattic.keyring
-sudo oaconfig install
-## verify:
+zypper in -y openattic
+ceph auth add client.openattic mon 'allow *' osd 'allow *'
+ceph auth get client.openattic -o /etc/ceph/ceph.client.openattic.keyring
+chmod 644 /etc/ceph/ceph.client.openattic.keyring
+chown openattic:openattic /etc/ceph/ceph.client.openattic.keyring
+oaconfig install
 systemctl status openattic-systemd.service|grep Active
-curl ses4qa5:80
-set +x
 EOF
 
-#scp /tmp/deploy_openAttic.sh root@${NAME_BASE}5:/tmp/
-#ssh root@${NAME_BASE}5 "chmod +x /tmp/deploy_openAttic.sh"
-#ssh root@${NAME_BASE}5 "su - cephadm -c 'source /tmp/deploy_openAttic.sh'"
+ssh root@${NAME_BASE}5 'bash -sx' < /tmp/deploy_openAttic.sh
+#---------------------------------------------------------------------------
 
-#ses4qa3_ip_addr=$(cat /etc/hosts|grep ses4qa3|awk '{print $1}')
-#
-## DEPLOY IGW @3rd node 
-#cat <<EOF > /tmp/lrbd.conf
-#{
-#    "auth": [
-#        {
-#            "target": "iqn.2003-01.org.linux-iscsi.iscsi.x86:demo",
-#            "authentication": "none"
-#        }
-#    ],
-#    "targets": [
-#        {
-#            "target": "iqn.2003-01.org.linux-iscsi.iscsi.x86:demo",
-#            "hosts": [
-#                {
-#                    "host": "ses4qa3.qatest",
-#                    "portal": "east"
-#                }
-#            ]
-#        }
-#    ],
-#    "portals": [
-#        {
-#            "name": "east",
-#            "addresses": [
-#                "$ses4qa3_ip_addr"
-#            ]
-#        }
-#    ],
-#    "pools": [
-#        {
-#            "pool": "iscsi",
-#            "gateways": [
-#                {
-#                    "target": "iqn.2003-01.org.linux-iscsi.iscsi.x86:demo",
-#                    "tpg": [
-#                        {
-#                            "image": "demo"
-#                        }
-#                    ]
-#                }
-#            ]
-#        }
-#    ]
-#    }
-#EOF
-#
-#cat <<EOF > /tmp/deploy_IGW.sh
-#set -x
-#sudo rbd -p iscsi create --size=2G demo
-#sudo rbd -p iscsi ls 
-#sudo zypper in -y -t pattern ceph_iscsi 
-#sudo systemctl enable lrbd
-#sudo lrbd -f /tmp/lrbd.conf 
-#sudo systemctl start lrbd 
-#sudo systemctl status lrbd -l 
-#sudo targetcli ls 
-#set +x
-#EOF
-#
-#scp /tmp/lrbd.conf root@${NAME_BASE}3:/tmp/
-#scp /tmp/deploy_IGW.sh root@${NAME_BASE}3:/tmp/
-#ssh root@${NAME_BASE}3 "chmod +x /tmp/deploy_IGW.sh"
-#ssh root@${NAME_BASE}3 "su - cephadm -c 'source /tmp/deploy_IGW.sh'"
-#
+#---------------------------------------------------------------------------
+# IGW 
+TARGET=iqn.2016-11.org.linux-iscsi.igw.x86:sn.target1
+HOSTNAME_FQDN=${NAME_BASE}3.$DOMAIN_NAME
+HOSTNAME_SHORT=${NAME_BASE}3
+TARGET_IP=$(grep $HOSTNAME_SHORT /etc/hosts|awk '{print $1}')
+POOL_NAME=iscsi
+IMG=demo
+ssh root@$MASTER "rbd -p $POOL_NAME create $IMG --size=5G"
+cat <<EOF > /tmp/lrbd.conf
+{
+    "auth": [ { "target": "$TARGET", "authentication": "none" } ],
+    "targets": [ { "target": "$TARGET", "hosts": [ { "host": "$HOSTNAME_FQDN", "portal": "portal-$HOSTNAME_SHORT" } ] } ],
+    "portals": [ { "name": "portal-$HOSTNAME_SHORT", "addresses": [ "$TARGET_IP" ] } ],
+    "pools": [ { "pool": "$POOL_NAME", "gateways": [ { "target": "$TARGET", "tpg": [ { "image": "$IMG" } ] } ] } ]
+}
+EOF
+scp /tmp/lrbd.conf root@${NAME_BASE}3:/tmp/
+ssh root@${NAME_BASE}3 <<EOSSH
+set -x
+sudo zypper in -y -t pattern ceph_iscsi
+systemctl enable lrbd
+lrbd -f /tmp/lrbd.conf
+lrbd
+targetcli ls 
+set +x
+EOSSH
+#---------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------
+# NFS-GANESHA - not supported 
+#---------------------------------------------------------------------------
