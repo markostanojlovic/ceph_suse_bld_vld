@@ -13,7 +13,7 @@ else
   source $1
 fi
 
-set -x
+set -ex
 
 NODES=''
 for (( i=1; i <= $VM_NUM; i++ ))
@@ -51,12 +51,14 @@ sleep 10
 set +x
 EOSSH
 
+set +e
 # bug# workaround 
 for (( i=2; i <= $VM_NUM; i++ ))
 do
   ssh root@${NAME_BASE}${i} "reboot"
 done
 sleep 90
+set -e
 
 #---------------------------------------------------------------------------
 ssh cephadm@$MASTER <<EOSSH
@@ -83,7 +85,7 @@ oaconfig install
 systemctl status openattic-systemd.service|grep Active
 EOF
 
-ssh root@${NAME_BASE}5 'bash -sx' < /tmp/deploy_openAttic.sh
+ssh root@${NAME_BASE}5 'bash -sx' < /tmp/deploy_openAttic_SES4.sh
 #---------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------
@@ -118,3 +120,7 @@ EOSSH
 #---------------------------------------------------------------------------
 # NFS-GANESHA - not supported 
 #---------------------------------------------------------------------------
+
+echo "Result: OK"
+
+set +ex
