@@ -31,6 +31,7 @@ mkdir -p $LOG_PATH
 if [[ $INSTALL_SALT == YES ]] 
 then
   ./$INSTALL_SALT_SCRIPT $1
+  ./4_logs/configure_logs.sh $1
 fi
 
 # SES DEPLOY
