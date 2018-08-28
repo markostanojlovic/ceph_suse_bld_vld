@@ -54,6 +54,7 @@ salt \$OA_fqdn cmd.run "sed -i 's/^#openattic__//' /etc/rsyslog.conf"
 sed -i 's/^#deepsea__//' /etc/rsyslog.conf
 sed -i 's/^#grafana__//' /etc/rsyslog.conf
 EOF
+scp src/node_helper.sh root@${MASTER}:/tmp/
 ssh root@$MASTER 'bash -sx' < /tmp/rsyslog_by_roles.sh
 
 # send logs directly to journal
