@@ -10,11 +10,8 @@ else
   source $1
 fi
 
-# Add rsyslog config entries to all nodes
-for (( i=1; i <= $VM_NUM; i++ ))
-do
-    ssh root@${NAME_BASE}${i} <<EOSSH
-# CONFIG journal and rsyslog
+cat <<EOFF > /tmp/configure_journal.sh
+#CONFIG journal and rsyslog
 mkdir -p /var/log/journal
 sed -i '/Storage/c\Storage=persistent' /etc/systemd/journald.conf
 systemctl restart systemd-journald.service
@@ -35,12 +32,15 @@ ruleset(name="writeToJournal") {
 }
 EOF
 systemctl restart rsyslog.service
-EOSSH
+EOFF
+
+for (( i=1; i <= $VM_NUM; i++ ))
+do
+    ssh root@${NAME_BASE}${i} 'bash -sx' < /tmp/configure_journal.sh 
 done
 
 # go to each minion, check if log file from the list exists and if so, uncomment entry in rsyslog config
-ssh root@$MASTER <<EOSSH
-set -x
+cat <<EOF > /tmp/rsyslog_by_roles.sh
 source /tmp/node_helper.sh
 # ganesha
 for i in \$(_get_fqdn_from_pillar_role ganesha);
@@ -48,13 +48,13 @@ do
 	salt \$i cmd.run "sed -i 's/^#ganesha__//' /etc/rsyslog.conf"
 done
 # openattic
-OA_fqdn=\$(_get_fqdn_from_pillar_role openattic);
+OA_fqdn=\$(_get_fqdn_from_pillar_role openattic)
 salt \$OA_fqdn cmd.run "sed -i 's/^#openattic__//' /etc/rsyslog.conf"
 # grafana and deepsea @MASTER
 sed -i 's/^#deepsea__//' /etc/rsyslog.conf
 sed -i 's/^#grafana__//' /etc/rsyslog.conf
-set +x
-EOSSH
+EOF
+ssh root@$MASTER 'bash -sx' < /tmp/rsyslog_by_roles.sh
 
 # send logs directly to journal
 # set all daemons logging : ceph daemon __daemon_name__ config set log_to_syslog true
