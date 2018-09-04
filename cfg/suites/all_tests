@@ -27,4 +27,5 @@
 ## Removing services
 #3_tests/01_basic_TCs/TC012_rm_services_with_deepsea.sh 
 
-
+# Migration 
+#3_tests/03_deepsea_TCs/TC005_migrate_filestore_bluestore.sh
