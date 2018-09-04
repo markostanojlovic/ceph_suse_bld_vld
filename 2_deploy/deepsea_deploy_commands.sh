@@ -13,11 +13,13 @@ echo "deepsea_minions: '*'" > /srv/pillar/ceph/deepsea_minions.sls
 
 salt-run state.orch ceph.stage.0
 salt-run state.orch ceph.stage.1
-echo "rgw_configurations:
-  rgw:
-    users:
-      - { uid: "admin", name: "Admin", email: "admin@demo.com", system: True }
-" > /srv/pillar/ceph/rgw.sls
+# bsc#1105739 /srv/pillar/ceph/rgw.sls config not working 
+#echo "rgw_configurations:
+#  rgw:
+#    users:
+#      - { uid: "admin", name: "Admin", email: "admin@demo.com", system: True }
+#      - { uid: "mstan", name: "mstan admin", email: "mstanadmin@demo.com", system: True }
+#" > /srv/pillar/ceph/rgw.sls
 echo "mon allow pool delete = true" >> /srv/salt/ceph/configuration/files/ceph.conf.d/global.conf
 echo "declare -x POL_CFG=/srv/pillar/ceph/proposals/policy.cfg" >> ~/.profile; .  ~/.profile
 cp /tmp/policy.cfg /srv/pillar/ceph/proposals/policy.cfg
