@@ -8,11 +8,11 @@ FIREWALL_DISABLED=1
 APPARMOR_DISABLED=1
 IPv6_DISABLED=1
 DHCP_HOSTNAME_DISABLED=1
-HOSTNAME_SETUP=1; HOSTNAME=qatest.qalab
+HOSTNAME_SETUP=1 ; HOSTNAME=qatest.qalab
 CLEAN_ZYPP_LOG=1
-REPOS_CONFIGURED=1; SCC_REG=sle12sp2_x86.sh
+REPOS_CONFIGURED=1 ; SCC_REG=sle12sp2_x86.sh
 SYS_UPDATED=1
-NTP_CONFIG=1; NTP_SERVER=cz.pool.ntp.org
+NTP_CONFIG=1 ; NTP_SERVER=cz.pool.ntp.org
 
 # GRUB CONSOLE
 if [[ $GRUB_CONSOLE == 1 ]]
@@ -21,6 +21,7 @@ then
 	if [[ $GRUB_TIMEOUT ]]
 	then
 		grep 'GRUB_TIMEOUT=1' /etc/default/grub || sed -i '/^GRUB_TIMEOUT/c\GRUB_TIMEOUT=1' /etc/default/grub
+	fi
 	grub2-mkconfig -o /boot/grub2/grub.cfg
 fi
 
@@ -70,7 +71,7 @@ fi
 # SYSTEM UPDATE
 if [[ $SYS_UPDATED == 1 ]]
 then 
-	zypper up -y 
+	zypper up --quiet -y 
 fi
 
 # NTP
