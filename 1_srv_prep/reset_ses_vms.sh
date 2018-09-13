@@ -107,7 +107,7 @@ touch /tmp/hostsfile
 for (( i=1; i <= $VM_NUM; i++ ))
 do 
   vmip=$(sudo virsh domifaddr ${NAME_BASE}${i}|grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
-  echo $vmip ${NAME_BASE}${i}
+  [[ -z $vmip ]] && exit 1
   ssh root@${vmip} "hostnamectl set-hostname --static ${NAME_BASE}${i}.${DOMAIN_NAME}" 
   echo $vmip ${NAME_BASE}${i}.${DOMAIN_NAME} ${NAME_BASE}${i} >> /tmp/hostsfile
   echo alias ${NAME_BASE}${i}="'ssh root@${NAME_BASE}${i}'" >> ~/.bashrc
