@@ -93,7 +93,14 @@ do
 done 
 
 ###############################
-sleep 180 # TODO dynamicly check when VM is available with ssh 
+sleep 30 
+counter=1
+while sleep 5
+do
+  if [[ $counter -eq 50 ]];then exit 1;else counter=$((counter+1)); fi 
+  sudo virsh domifaddr ${NAME_BASE}${VM_NUM}|grep ipv4 && break
+done
+sleep 10
 ###############################
 
 # get IPs of the VMs
@@ -127,4 +134,5 @@ do
   ssh root@${NAME_BASE}${i} "cat /tmp/hostsfile >> /etc/hosts"
 done
 
+echo "Result: OK"
 set +x
