@@ -1,0 +1,14 @@
+cluster-ceph/cluster/*.sls
+config/stack/default/global.yml
+config/stack/default/ceph/cluster.yml
+role-master/cluster/__NAMEBASE__1*.sls
+role-admin/cluster/__NAMEBASE__[1234]*.sls
+role-mon/cluster/__NAMEBASE__[123]*.sls
+role-mgr/cluster/__NAMEBASE__[123]*.sls
+role-mds/cluster/__NAMEBASE__[23]*.sls
+role-igw/cluster/__NAMEBASE__[12]*.sls
+#role-rgw/cluster/__NAMEBASE__[3]*.sls
+role-ganesha/cluster/__NAMEBASE__[34]*.sls
+role-openattic/cluster/__NAMEBASE__5*.sls
+profile-default/cluster/*.sls
+profile-default/stack/default/ceph/minions/*yml
