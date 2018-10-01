@@ -13,12 +13,13 @@
 
 ## Other TCs
 3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh 
+3_tests/02_other_TCs/TC002_EC_CephFS_data_pool.sh
 
 ## DeepSea TCs
 3_tests/03_deepsea_TCs/TC002_proposal_populate.sh
 
 ## NFS (only for x86_64)
-3_tests/04_NFS_TCs/TC001_NFS_active_passive_HA.sh 
+#3_tests/04_NFS_TCs/TC001_NFS_active_passive_HA.sh 
 
 ## IGW
 3_tests/05_IGW_TCs/TC001_igw_custom_conf.sh
