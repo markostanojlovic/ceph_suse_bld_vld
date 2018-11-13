@@ -23,7 +23,8 @@
 # - Suse Firewall disabled 
 # - disabled hostname obtaining from DHCP: /etc/sysconfig/network/dhcp: DHCLIENT_SET_HOSTNAME="no"
 # - ssh hey copied in .ssh/authorized_keys 
-# - zypper in -y vim wget [for minimal system]
+# - zypper in -y vim wget qemu-guest-agent [for minimal system]
+# - installed qemu-guest-agent !!!
 # - cleaned /var/log/zypper.log logs 
 
 # Most important vars to setup:
@@ -99,14 +100,14 @@ do
 done 
 
 ###############################
-sleep 30 
+sleep 60 
 counter=1
 while sleep 5
 do
   if [[ $counter -eq 50 ]];then exit 1;else counter=$((counter+1)); fi 
-  sudo virsh domifaddr ${NAME_BASE}${VM_NUM}|grep ipv4 && break
+  sudo virsh domifaddr ${NAME_BASE}${VM_NUM} --source agent --interface eth0|grep ipv4 && break
 done
-sleep 10
+sleep 5
 ###############################
 
 # get IPs of the VMs
@@ -119,7 +120,7 @@ touch /tmp/hostsfile
 
 for (( i=1; i <= $VM_NUM; i++ ))
 do 
-  vmip=$(sudo virsh domifaddr ${NAME_BASE}${i}|grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
+  vmip=$(sudo virsh domifaddr ${NAME_BASE}${i} --source agent --interface eth0|grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
   [[ -z $vmip ]] && exit 1
   ssh root@${vmip} "hostnamectl set-hostname --static ${NAME_BASE}${i}.${DOMAIN_NAME}" 
   echo $vmip ${NAME_BASE}${i}.${DOMAIN_NAME} ${NAME_BASE}${i} >> /tmp/hostsfile
