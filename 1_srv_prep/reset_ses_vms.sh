@@ -6,18 +6,23 @@
 
 # Installed pkgs on the host: 
 # zypper in -y libvirt virt-install git-core #qemu-uefi-aarch64
+# libvirt requirements:
+#     - pool name has to be actual directory on the host 
 
 # Clone img VM settings/configs:
 # - grub2 settings: /etc/default/grub; grub2-mkconfig -o /boot/grub2/grub.cfg 
 #     - console=ttyS0 or ttyAMA0,115200 for SLES12SP3
 #     - GRUB_TIMEOUT=2
-# - ntpd started and configured for : cz.pool.ntp.org
+# - NTP
+#     - ntpd started and configured for : cz.pool.ntp.org [SES5]
+#     - chronyd started and configured for : cz.pool.ntp.org [SES6]
 # - repos are configured and image is patched to latest updates 
 # - apparmor disabled
 # - IPv6 disabled 
 # - Suse Firewall disabled 
 # - disabled hostname obtaining from DHCP: /etc/sysconfig/network/dhcp: DHCLIENT_SET_HOSTNAME="no"
 # - ssh hey copied in .ssh/authorized_keys 
+# - zypper in -y vim wget [for minimal system]
 # - cleaned /var/log/zypper.log logs 
 
 # Most important vars to setup:
