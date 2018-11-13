@@ -6,6 +6,7 @@
 
 # Installed pkgs on the host: 
 # zypper in -y libvirt virt-install git-core #qemu-uefi-aarch64
+# zypper in -y sudo vim wget [SLE15]
 # libvirt requirements:
 #     - pool name has to be actual directory on the host 
 
