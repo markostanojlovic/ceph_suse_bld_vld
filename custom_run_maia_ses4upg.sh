@@ -10,7 +10,7 @@ ssh root@ses4node1 zypper migration --quiet --non-interactive --allow-vendor-cha
 ssh root@ses4node1 cat /etc/os-release
 ssh root@ses4node1 zypper lr
 
-ISO_REPO_url=http://dist.suse.de/install/SUSE-Enterprise-Storage-5.5-M9/SUSE-Enterprise-Storage-5-DVD-x86_64-Build0805-Media1.iso
+ISO_REPO_url=$(cat cfg/repos/REPO_ISO_URL_x86_64)
 ISO_REPO_file=${ISO_REPO_url##*/}
 VM_NUM=5
 NAME_BASE=ses4node
