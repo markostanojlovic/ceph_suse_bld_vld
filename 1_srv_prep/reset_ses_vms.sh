@@ -97,10 +97,11 @@ done
 for (( i=1; i <= $VM_NUM; i++ ))
 do 
   sudo virsh start ${NAME_BASE}${i}
+  sleep 2
 done 
 
 ###############################
-sleep 60 
+sleep 40 
 counter=1
 while sleep 5
 do
@@ -122,7 +123,7 @@ for (( i=1; i <= $VM_NUM; i++ ))
 do 
   vmip=$(sudo virsh domifaddr ${NAME_BASE}${i} --source agent --interface eth0|grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
   [[ -z $vmip ]] && exit 1
-  ssh root@${vmip} "hostnamectl set-hostname --static ${NAME_BASE}${i}.${DOMAIN_NAME}" 
+  ssh root@${vmip} "hostnamectl set-hostname ${NAME_BASE}${i}.${DOMAIN_NAME}" 
   ssh root@${vmip} sed -i '/^DHCLIENT_SET_HOSTNAME/c\DHCLIENT_SET_HOSTNAME=\"no\"' /etc/sysconfig/network/dhcp
   echo $vmip ${NAME_BASE}${i}.${DOMAIN_NAME} ${NAME_BASE}${i} >> /tmp/hostsfile
   echo alias ${NAME_BASE}${i}="'ssh root@${NAME_BASE}${i}'" >> ~/.bashrc
