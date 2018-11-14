@@ -107,7 +107,7 @@ do
   if [[ $counter -eq 50 ]];then exit 1;else counter=$((counter+1)); fi 
   sudo virsh domifaddr ${NAME_BASE}${VM_NUM} --source agent --interface eth0|grep ipv4 && break
 done
-sleep 5
+sleep 10
 ###############################
 
 # get IPs of the VMs
@@ -122,14 +122,22 @@ for (( i=1; i <= $VM_NUM; i++ ))
 do 
   vmip=$(sudo virsh domifaddr ${NAME_BASE}${i} --source agent --interface eth0|grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
   [[ -z $vmip ]] && exit 1
-  # checking if not duplicated IP > bug in libvirt and sle15
-  grep $vmip /tmp/hostsfile && exit 1 || echo "..."
   # ssh root@${vmip} "hostnamectl set-hostname ${NAME_BASE}${i}.${DOMAIN_NAME}" 
   ssh root@${vmip} "hostnamectl set-hostname --static ${NAME_BASE}${i}.${DOMAIN_NAME}" 
   ssh root@${vmip} "hostnamectl set-hostname --transient ${NAME_BASE}${i}.${DOMAIN_NAME}" 
   ssh root@${vmip} sed -i '/^DHCLIENT_SET_HOSTNAME/c\DHCLIENT_SET_HOSTNAME=\"no\"' /etc/sysconfig/network/dhcp
-  echo $vmip ${NAME_BASE}${i}.${DOMAIN_NAME} ${NAME_BASE}${i} >> /tmp/hostsfile
   echo alias ${NAME_BASE}${i}="'ssh root@${NAME_BASE}${i}'" >> ~/.bashrc
+  # WORKAROUND : since libvirt DHCP is changing ips while VM is running, setting static IPs
+  if [[ STATIC_IP -eq 1 ]];then
+      ip=${IP_BASE}.${IP_SUFIX}
+      sed "s/__IP_ADDR__/${ip}/" $CMD_TMPL > /tmp/static_ip.sh
+      ssh root@${vmip} 'bash -s' < /tmp/static_ip.sh
+      nohup ssh root@${vmip} 'nohup rcnetwork restart &' &
+      sleep 1
+      (( IP_SUFIX += 1 ))
+      vmip=$ip
+  fi
+  echo $vmip ${NAME_BASE}${i}.${DOMAIN_NAME} ${NAME_BASE}${i} >> /tmp/hostsfile
 done
 cat /tmp/hostsfile
 sudo bash -c 'cat /tmp/hostsfile >> /etc/hosts'
