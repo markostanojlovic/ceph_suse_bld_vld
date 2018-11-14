@@ -124,7 +124,9 @@ do
   [[ -z $vmip ]] && exit 1
   # checking if not duplicated IP > bug in libvirt and sle15
   grep $vmip /tmp/hostsfile && exit 1 || echo "..."
-  ssh root@${vmip} "hostnamectl set-hostname ${NAME_BASE}${i}.${DOMAIN_NAME}" 
+  # ssh root@${vmip} "hostnamectl set-hostname ${NAME_BASE}${i}.${DOMAIN_NAME}" 
+  ssh root@${vmip} "hostnamectl set-hostname --static ${NAME_BASE}${i}.${DOMAIN_NAME}" 
+  ssh root@${vmip} "hostnamectl set-hostname --transient ${NAME_BASE}${i}.${DOMAIN_NAME}" 
   ssh root@${vmip} sed -i '/^DHCLIENT_SET_HOSTNAME/c\DHCLIENT_SET_HOSTNAME=\"no\"' /etc/sysconfig/network/dhcp
   echo $vmip ${NAME_BASE}${i}.${DOMAIN_NAME} ${NAME_BASE}${i} >> /tmp/hostsfile
   echo alias ${NAME_BASE}${i}="'ssh root@${NAME_BASE}${i}'" >> ~/.bashrc
