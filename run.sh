@@ -14,7 +14,7 @@ else
   source $1
 fi
 
-set -x 
+set -ex 
 
 # LOGS
 LOG_DIR=depl_$(date +%Y_%m_%d_%H_%M)
@@ -32,6 +32,8 @@ if [[ $INSTALL_SALT == YES ]]
 then
   ./$INSTALL_SALT_SCRIPT $1
 fi
+
+set +e
 
 # SES DEPLOY
 ./$SES_DEPLOY_SCRIPT $1 > ${LOG_PATH}/TC000_SES_deployment.log 2>&1

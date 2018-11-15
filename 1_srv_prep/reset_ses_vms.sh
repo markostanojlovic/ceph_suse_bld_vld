@@ -124,24 +124,24 @@ do
   [[ -z $vmip ]] && exit 1
   # checking if not duplicated IP
   grep $vmip /tmp/hostsfile && exit 1 || echo "..."
-  # ssh root@${vmip} "hostnamectl set-hostname ${NAME_BASE}${i}.${DOMAIN_NAME}" 
-  ssh root@${vmip} "hostnamectl set-hostname --static ${NAME_BASE}${i}.${DOMAIN_NAME}" 
-  ssh root@${vmip} "hostnamectl set-hostname --transient ${NAME_BASE}${i}.${DOMAIN_NAME}" 
-  ssh root@${vmip} sed -i '/^DHCLIENT_SET_HOSTNAME/c\DHCLIENT_SET_HOSTNAME=\"no\"' /etc/sysconfig/network/dhcp
-  echo alias ${NAME_BASE}${i}="'ssh root@${NAME_BASE}${i}'" >> ~/.bashrc
   # WORKAROUND : since libvirt DHCP is changing ips while VM is running, setting static IPs
   if [[ STATIC_IP -eq 1 ]];then
       ip=${IP_BASE}.${IP_SUFIX}
       sed "s/__IP_ADDR__/${ip}/" $CMD_TMPL > /tmp/static_ip.sh
       ssh root@${vmip} 'bash -s' < /tmp/static_ip.sh
       nohup ssh root@${vmip} 'nohup rcnetwork restart &' &
-      sleep 1
+      sleep 10
       (( IP_SUFIX += 1 ))
       vmip=$ip
       ssh root@${vmip} "ip route add default via 192.168.122.1 dev eth0"
       ssh root@${vmip} "echo nameserver 192.168.122.1|tee -a /etc/resolv.conf"
   fi
   echo $vmip ${NAME_BASE}${i}.${DOMAIN_NAME} ${NAME_BASE}${i} >> /tmp/hostsfile
+  # ssh root@${vmip} "hostnamectl set-hostname ${NAME_BASE}${i}.${DOMAIN_NAME}" 
+  ssh root@${vmip} "hostnamectl set-hostname --static ${NAME_BASE}${i}.${DOMAIN_NAME}"
+  ssh root@${vmip} "hostnamectl set-hostname --transient ${NAME_BASE}${i}.${DOMAIN_NAME}"
+  ssh root@${vmip} sed -i '/^DHCLIENT_SET_HOSTNAME/c\DHCLIENT_SET_HOSTNAME=\"no\"' /etc/sysconfig/network/dhcp
+  echo alias ${NAME_BASE}${i}="'ssh root@${NAME_BASE}${i}'" >> ~/.bashrc
 done
 cat /tmp/hostsfile
 sudo bash -c 'cat /tmp/hostsfile >> /etc/hosts'
