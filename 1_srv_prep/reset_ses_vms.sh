@@ -137,7 +137,7 @@ do
       (( IP_SUFIX += 1 ))
       vmip=$ip
       ssh root@${vmip} "ip route add default via 192.168.122.1 dev eth0"
-      ssh root@${vmip} "echo nameserver 192.168.122.1|tee -a /etc/resolf.conf"
+      ssh root@${vmip} "echo nameserver 192.168.122.1|tee -a /etc/resolv.conf"
   fi
   echo $vmip ${NAME_BASE}${i}.${DOMAIN_NAME} ${NAME_BASE}${i} >> /tmp/hostsfile
 done
