@@ -122,6 +122,8 @@ for (( i=1; i <= $VM_NUM; i++ ))
 do 
   vmip=$(sudo virsh domifaddr ${NAME_BASE}${i} --source agent --interface eth0|grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
   [[ -z $vmip ]] && exit 1
+  # checking if not duplicated IP
+  grep $vmip /tmp/hostsfile && exit 1 || echo "..."
   # ssh root@${vmip} "hostnamectl set-hostname ${NAME_BASE}${i}.${DOMAIN_NAME}" 
   ssh root@${vmip} "hostnamectl set-hostname --static ${NAME_BASE}${i}.${DOMAIN_NAME}" 
   ssh root@${vmip} "hostnamectl set-hostname --transient ${NAME_BASE}${i}.${DOMAIN_NAME}" 
