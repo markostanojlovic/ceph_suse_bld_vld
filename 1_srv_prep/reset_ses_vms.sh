@@ -12,8 +12,8 @@
 
 # Clone img VM settings/configs:
 # - grub2 settings: /etc/default/grub; grub2-mkconfig -o /boot/grub2/grub.cfg 
-#     - console=ttyS0 or ttyAMA0,115200 for SLES12SP3
-#     - GRUB_TIMEOUT=2
+#     - console=ttyS0 or ttyAMA0,115200 for arm/aarch64
+#     - GRUB_TIMEOUT=1
 # - NTP
 #     - ntpd started and configured for : cz.pool.ntp.org [SES5]
 #     - chronyd started and configured for : cz.pool.ntp.org [SES6]
@@ -23,7 +23,7 @@
 # - Suse Firewall disabled 
 # - disabled hostname obtaining from DHCP: /etc/sysconfig/network/dhcp: DHCLIENT_SET_HOSTNAME="no"
 # - ssh hey copied in .ssh/authorized_keys 
-# - zypper in -y vim wget qemu-guest-agent [for minimal system]
+# - zypper in -y vim wget iputils qemu-guest-agent [for minimal system]
 # - installed qemu-guest-agent !!!
 # - cleaned /var/log/zypper.log logs 
 
@@ -125,7 +125,13 @@ do
   # checking if not duplicated IP
   grep $vmip /tmp/hostsfile && exit 1 || echo "..."
   # WORKAROUND : since libvirt DHCP is changing ips while VM is running, setting static IPs
-  if [[ STATIC_IP -eq 1 ]];then
+  # - limit the range of libvirt DHCP IPs to be up to 150 
+  #   EXAMPLE: sudo virsh net-edit default
+  #    <dhcp>
+  #        <range start='192.168.122.2' end='192.168.122.150'/>
+  #    </dhcp>
+
+  if [[ $STATIC_IP -eq 1 ]];then
       ip=${IP_BASE}.${IP_SUFIX}
       sed "s/__IP_ADDR__/${ip}/" $CMD_TMPL > /tmp/static_ip.sh
       ssh root@${vmip} 'bash -s' < /tmp/static_ip.sh

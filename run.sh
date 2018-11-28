@@ -27,11 +27,11 @@ mkdir -p $LOG_PATH
 # REPO ISO 
 ./$TESTING_REPO_SCRIPT $1
 
+# SCC REGISTRATION
+[[ $SCC_REG == YES ]] && ./1_srv_prep/register_and_update.sh $1
+
 # SALT-STACK
-if [[ $INSTALL_SALT == YES ]] 
-then
-  ./$INSTALL_SALT_SCRIPT $1
-fi
+[[ $INSTALL_SALT == YES ]] && ./$INSTALL_SALT_SCRIPT $1
 
 set +e
 

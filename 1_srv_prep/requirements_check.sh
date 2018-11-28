@@ -18,7 +18,7 @@ NTP_CONFIG=1 ; NTP_SERVER=cz.pool.ntp.org
 if [[ $GRUB_CONSOLE == 1 ]]
 then 
 	grep 'console=ttyS0' /etc/default/grub || sed -i '/GRUB_CMDLINE_LINUX_DEFAULT/s/quiet/quiet console=ttyS0/' /etc/default/grub
-	if [[ $GRUB_TIMEOUT ]]
+	if [[ $GRUB_TIMEOUT == 1 ]]
 	then
 		grep 'GRUB_TIMEOUT=1' /etc/default/grub || sed -i '/^GRUB_TIMEOUT/c\GRUB_TIMEOUT=1' /etc/default/grub
 	fi

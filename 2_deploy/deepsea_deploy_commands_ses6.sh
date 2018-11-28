@@ -1,6 +1,7 @@
 #!/bin/bash
 set -ex
 
+zypper in -y deepsea
 echo "deepsea_minions: '*'" > /srv/pillar/ceph/deepsea_minions.sls
 salt-run state.orch ceph.stage.0
 salt-run state.orch ceph.stage.1

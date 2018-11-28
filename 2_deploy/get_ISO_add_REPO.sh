@@ -4,31 +4,26 @@
 # Example:      ./2_deploy/get_ISO_add_REPO.sh cfg/maiax86_64.cfg 
 # Desc:		Downloading ISO image on each host and adding it as repo
 
-if [[ -z $1 ]]
-then
-  echo "ERROR: Argument missing."
-  echo "Example:"
-  echo "./2_deploy/get_ISO_add_REPO.sh cfg/maiax86_64.cfg"
-  exit 1
-else 
-  source $1
-fi
+[[ -z $1 ]] && exit 1 || source $1
 
 iso_download_url=$REPO_URL
 iso_name=${iso_download_url##*/}
 
-# download iso
 for (( i=1; i <= $VM_NUM; i++ ))
 do
-  # download iso 
-  ssh root@${NAME_BASE}${i} wget -q -P /tmp/ $iso_download_url
   # trust always gpg key
   ssh root@${NAME_BASE}${i} "sed -i -e '/^# repo_gpgcheck/a\gpgcheck = off' /etc/zypp/zypp.conf"
   # allow vendor change 
   ssh root@${NAME_BASE}${i} "sed -i -e '/^# solver.allowVendorChange/a\solver.allowVendorChange = true' /etc/zypp/zypp.conf"
-  # add repo
-  ssh root@${NAME_BASE}${i} zypper ar -c -f "iso:/?iso=/tmp/${iso_name}" SES
-  ssh root@${NAME_BASE}${i} zypper ref
-  ssh root@${NAME_BASE}${i} rpm --rebuilddb
+  # download and add repo from iso 
+  for repo in $(cat $REPO_FILE); do
+    iso_download_url=$repo
+    iso_name=${iso_download_url##*/}
+    repo_name=$(echo $iso_download_url|md5sum|cut -c -8)
+    ssh root@${NAME_BASE}${i} wget -q -P /tmp/ $iso_download_url
+    ssh root@${NAME_BASE}${i} zypper ar -c -f "iso:/?iso=/tmp/${iso_name}" $repo_name
+  done
+  # ssh root@${NAME_BASE}${i} zypper ref
+  # ssh root@${NAME_BASE}${i} rpm --rebuilddb # old workaournd
 done 
 

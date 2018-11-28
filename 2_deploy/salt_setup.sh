@@ -4,15 +4,7 @@
 # Example:	./2_deploy/salt_setup.sh cfg/maiax86_64.cfg 
 # Desc:		Installing SALT-STACK and configuring master and minions
 
-if [[ -z $1 ]]
-then
-  echo "ERROR: ENV_CONF argument missing."
-  echo "Example:"
-  echo "./2_deploy/salt_setup.sh cfg/maiax86_64.cfg cfg/REPO_ISO_URL_x86_64"
-  exit 1
-else 
-  source $1
-fi
+[[ -z $1 ]] && exit 1 || source $1
 
 set -x
 
@@ -21,7 +13,7 @@ sudo rm /tmp/configure_salt_master.sh
 cat <<EOF > /tmp/configure_salt_master.sh 
 set -x
 SALT_MASTER_IP=\$(ip a s dev eth0|grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"|grep -v 255)
-zypper in -y deepsea
+zypper in -y salt-master
 sed -i "/#interface: 0.0.0.0/c\interface: \${SALT_MASTER_IP}" /etc/salt/master
 sed -i "/#timeout: 5/c\timeout: 25" /etc/salt/master
 sed -i "/#master: salt/c\master: ${NAME_BASE}1" /etc/salt/minion
