@@ -19,7 +19,7 @@ mount|grep mnt && umount /mnt -f
 mount -t ceph $CEPHFS_IP:6789:/ /mnt -o name=admin,secretfile=/etc/ceph/admin.secret
 
 # write test 
-openssl rand -base64 10000000 -out /mnt/cephfs_random.txt
+openssl rand -base64 -out /mnt/cephfs_random.txt 10000000
 
 # read test 
 ls -la /mnt

@@ -13,7 +13,7 @@ sudo rm /tmp/configure_salt_master.sh
 cat <<EOF > /tmp/configure_salt_master.sh 
 set -x
 SALT_MASTER_IP=\$(ip a s dev eth0|grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"|grep -v 255)
-zypper in -y salt-master
+zypper in -y salt-master salt-minion
 sed -i "/#interface: 0.0.0.0/c\interface: \${SALT_MASTER_IP}" /etc/salt/master
 sed -i "/#timeout: 5/c\timeout: 25" /etc/salt/master
 sed -i "/#master: salt/c\master: ${NAME_BASE}1" /etc/salt/minion

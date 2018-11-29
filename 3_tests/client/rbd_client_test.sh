@@ -30,7 +30,7 @@ lsblk|grep ${DEV_NAME}p1 || ( sgdisk --largest-new=1 $MAPPED_DEV; mkfs.xfs ${MAP
 mount|grep mnt && umount /mnt -f
 mount ${MAPPED_DEV}p1 /mnt
 ls -la /mnt
-openssl rand -base64 1000000 -out /mnt/rbd_random.txt
+openssl rand -base64 -out /mnt/rbd_random.txt 1000000
 tail /mnt/rbd_random.txt
 umount /mnt -f
 rbd_unmap_all

@@ -19,7 +19,7 @@ umount -f /mnt
 set -ex
 mount -t ceph -o mds_namespace=ec_cephfs ses5node2:/ /mnt -o name=admin,secretfile=/etc/ceph/admin.secret
 # write test 
-openssl rand -base64 10000000 -out /mnt/cephfs_random_$(date +%Y_%m_%d_%H_%M).txt
+openssl rand -base64 -out /mnt/cephfs_random_$(date +%Y_%m_%d_%H_%M).txt 10000000
 # read test 
 ls -la /mnt
 tail /mnt/cephfs_random*txt

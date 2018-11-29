@@ -20,7 +20,7 @@ mount -t nfs -o rw,sync
 mount.nfs4 " > $MOUNTS
 ####################################
 
-openssl rand -base64 10000000 -out /tmp/random.txt # 13MB 
+openssl rand -base64 -out /tmp/random.txt 10000000
 mount|grep '/mnt ' && sudo umount /mnt -f 
 ping -q -c 3 $NFS_IP
 

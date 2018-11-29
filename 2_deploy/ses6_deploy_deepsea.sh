@@ -1,12 +1,6 @@
 #!/bin/bash
 
-if [[ -z $1 ]]
-then
-  echo "ERROR: Argument missing. USAGE: .script.sh cfg/CONFIG.cfg"
-  exit 1
-else 
-  source $1
-fi
+[[ -z $1 ]] && exit 1 || source $1
 
 set -ex
 

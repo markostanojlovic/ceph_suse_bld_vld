@@ -18,7 +18,7 @@ ceph osd pool application enable test_ec_pool rbd
 for i in 1 2 3 4 5
 do 
   file_name=/tmp/random_${i}.txt
-  openssl rand -base64 1000000 -out $file_name # 1.3MB
+  openssl rand -base64 -out $file_name 1000000 # 1.3MB
   rados -p test_ec_pool put object_${i} $file_name
   ceph osd map test_ec_pool object_${i}
 done

@@ -25,7 +25,7 @@ do
 	mount|grep mnt && umount /mnt -f
 	mount /dev/${new_disk}1 /mnt
 	ls -la /mnt
-	openssl rand -base64 10000000 -out /mnt/igw_random.txt
+	openssl rand -base64 -out /mnt/igw_random.txt 10000000
 	tail /mnt/igw_random.txt
 	umount /mnt
 	partprobe
