@@ -5,8 +5,9 @@ role-master/cluster/__NAMEBASE__1*.sls
 role-admin/cluster/__NAMEBASE__[1234]*.sls
 role-mon/cluster/__NAMEBASE__[123]*.sls
 role-mgr/cluster/__NAMEBASE__[123]*.sls
-role-mds/cluster/__NAMEBASE__[23]*.sls
-role-rgw/cluster/__NAMEBASE__[13]*.sls
-role-ganesha/cluster/__NAMEBASE__[34]*.sls
+role-mds/cluster/__NAMEBASE__[123]*.sls
+role-rgw/cluster/__NAMEBASE__[2]*.sls
+role-igw/cluster/__NAMEBASE__[3]*.sls
+role-ganesha/cluster/__NAMEBASE__[4]*.sls
 profile-default/cluster/*.sls
 profile-default/stack/default/ceph/minions/*yml
