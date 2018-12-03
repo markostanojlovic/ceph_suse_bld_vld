@@ -52,15 +52,7 @@
 # --extra-args kernel_args="console=/dev/ttyS0 autoyast=file://VM/autoyast_SLES12SP3_for_cloud_image.xml"
 #=============================================
 
-if [[ -z $1 ]]
-then
-  echo "ERROR: ENV_CONF argument missing. USAGE:"
-  echo "./1_srv_prep/reset_ses_vms.sh cfg/maiax86_64.cfg"
-  exit 1
-else
-  #read config file
-  source $1
-fi
+[[ -z $1 ]] && exit 1 || source $1
 
 set -x
 
@@ -100,14 +92,14 @@ do
 done 
 
 ###############################
-sleep 40 
+sleep 30 
 counter=1
 while sleep 5
 do
   if [[ $counter -eq 50 ]];then exit 1;else counter=$((counter+1)); fi 
   sudo virsh domifaddr ${NAME_BASE}${VM_NUM} --source agent --interface eth0|grep ipv4 && break
 done
-sleep 10
+sleep 30
 ###############################
 
 # get IPs of the VMs
