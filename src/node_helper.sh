@@ -3,8 +3,15 @@
 # Scipt needs to be copied to /tmp at master node before executing 
 
 function _get_osd_disk_dev {
-    disk=$(mount|grep ceph|awk -F '/' '{print $3}'|head -c 3)
+    # disk=$(mount|grep ceph|awk -F '/' '{print $3}'|head -c 3)
+    disk=$(ceph-volume lvm list|grep -A 15 osd.${1}|grep devices|awk -F '/' '{print $3}'|head -c 3)
     echo $disk
+}
+
+function _get_osd_disk_device {
+    # ses6 nautilus
+    device=$(ceph-volume lvm list|grep -A 3 osd.${1}|grep block|awk '{print $2}')
+    echo $device
 }
 
 function _get_osd_id {
