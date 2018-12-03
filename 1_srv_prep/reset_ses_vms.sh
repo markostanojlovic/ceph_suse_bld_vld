@@ -23,7 +23,7 @@
 # - Suse Firewall disabled 
 # - disabled hostname obtaining from DHCP: /etc/sysconfig/network/dhcp: DHCLIENT_SET_HOSTNAME="no"
 # - ssh hey copied in .ssh/authorized_keys 
-# - zypper in -y vim wget iputils qemu-guest-agent [for minimal system]
+# - zypper in -y vim wget iputils qemu-guest-agent rsync [for minimal system]
 # - installed qemu-guest-agent !!!
 # - cleaned /var/log/zypper.log logs 
 
