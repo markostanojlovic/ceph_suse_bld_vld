@@ -10,14 +10,13 @@ LOG=$(setup_log_path $@)
 echo "Log path: " $LOG
 
 ssh root@$MASTER 'bash -s' < 3_tests/master/create_EC_CephFS_pool.sh >> $LOG 2>&1
-# TODO client test 
-#    - assuming that ses5node2 is the MDS node  TODO
+mds_node=$(ssh root@$MASTER "ceph mds stat"|awk -F ',' '{print $2}'|grep ec_cephfs|awk -F '=' '{print $2}')
 ssh root@$MASTER ceph auth list 2>/dev/null|grep -A 1 client.admin|grep key| awk -F ':' '{print $2}'|tr -d ' ' > /tmp/admin.secret
 scp /tmp/admin.secret root@$CLIENT_NODE:/etc/ceph/
 ssh root@$CLIENT_NODE << EOSSH >> $LOG 2>&1
 umount -f /mnt 
 set -ex
-mount -t ceph -o mds_namespace=ec_cephfs ses5node2:/ /mnt -o name=admin,secretfile=/etc/ceph/admin.secret
+mount -t ceph -o mds_namespace=ec_cephfs $mds_node:/ /mnt -o name=admin,secretfile=/etc/ceph/admin.secret
 # write test 
 openssl rand -base64 -out /mnt/cephfs_random_$(date +%Y_%m_%d_%H_%M).txt 10000000
 # read test 
