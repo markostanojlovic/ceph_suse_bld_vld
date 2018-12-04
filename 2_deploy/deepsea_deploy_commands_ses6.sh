@@ -17,6 +17,7 @@ cd -
 # --------------------------------------------------------------------------------
 salt-run state.orch ceph.stage.2
 salt-run state.orch ceph.stage.3
+sed -i "/Transports/a Squash = No_Root_Squash;" /srv/salt/ceph/ganesha/files/ganesha.conf.j2
 salt-run state.orch ceph.stage.4
 salt-call state.apply ceph.salt-api
 
