@@ -15,6 +15,7 @@
 3_tests/02_other_TCs/TC015_convert_repl_to_EC_pool.sh 
 3_tests/02_other_TCs/TC002_EC_CephFS_data_pool.sh
 3_tests/02_other_TCs/TC003_zstd_force_pool_compression.sh
+3_tests/02_other_TCs/TC012_rgw_s3_rw.sh
 
 ## DeepSea TCs
 3_tests/03_deepsea_TCs/TC002_proposal_populate.sh
