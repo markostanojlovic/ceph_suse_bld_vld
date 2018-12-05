@@ -15,6 +15,6 @@ RGW_USER=admin
 scp 3_tests/client/rgw_s3.py root@$MASTER:/tmp/
 ssh root@$MASTER "python3 /tmp/rgw_s3.py ${RGW_NODE}:${RGW_PORT} $RGW_USER" >> $LOG 2>&1
 
-echo "Result: OK"
+echo "Result: OK" >> $LOG
 
 set +ex 
