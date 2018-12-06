@@ -22,4 +22,6 @@ systemctl start  rbdmap.service
 systemctl status rbdmap.service
 rbd showmapped|grep $RBD_IMG
 
+echo "Result: OK"
+
 set +ex
